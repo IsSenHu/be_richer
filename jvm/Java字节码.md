@@ -168,7 +168,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.241-b07, mixed mode)
 
 ​		每个常量池项(cp_info) 都会对应记录着class文件中的某种类型的字面量。让我们先来了解一下常量池项(cp_info)的结构：
 
-``` java
+``` javascript
 cp_info {
   u1 tag;
   u1[] info;
@@ -235,77 +235,7 @@ public class IntAndFloatTest {
 
 ​		我们通过javap -verbose com.gapache.commons.jvm.bytecode.IntAndFloatTest 指令来看一下其常量池中的信息，可以看到虽然我们在代码中写了两次10 和三次11f，但是常量池中，就只有一个常量10 和一个常量11f，如下所示：
 
-Constant pool:
-
-  \#1 = Methodref     #9.#28     // java/lang/Object."<init>":()V
-
-  \#2 = Fieldref      #8.#29     // com/gapache/commons/jvm/bytecode/IntAndFloatTest.a:I
-
-  \#3 = Fieldref      #8.#30     // com/gapache/commons/jvm/bytecode/IntAndFloatTest.b:I
-
-  \#4 = Float       11.0f
-
-  \#5 = Fieldref      #8.#31     // com/gapache/commons/jvm/bytecode/IntAndFloatTest.c:F
-
-  \#6 = Fieldref      #8.#32     // com/gapache/commons/jvm/bytecode/IntAndFloatTest.d:F
-
-  \#7 = Fieldref      #8.#33     // com/gapache/commons/jvm/bytecode/IntAndFloatTest.e:F
-
-  \#8 = Class       #34      // com/gapache/commons/jvm/bytecode/IntAndFloatTest
-
-  \#9 = Class       #35      // java/lang/Object
-
- \#10 = Utf8        a
-
- \#11 = Utf8        I
-
- \#12 = Utf8        ConstantValue
-
- \#13 = Integer      10
-
- \#14 = Utf8        b
-
- \#15 = Utf8        c
-
- \#16 = Utf8        F
-
- \#17 = Utf8        d
-
- \#18 = Utf8        e
-
- \#19 = Utf8        <init>
-
- \#20 = Utf8        ()V
-
- \#21 = Utf8        Code
-
- \#22 = Utf8        LineNumberTable
-
- \#23 = Utf8        LocalVariableTable
-
- \#24 = Utf8        this
-
- \#25 = Utf8        Lcom/gapache/commons/jvm/bytecode/IntAndFloatTest;
-
- \#26 = Utf8        SourceFile
-
- \#27 = Utf8        IntAndFloatTest.java
-
- \#28 = NameAndType    #19:#20    // "<init>":()V
-
- \#29 = NameAndType    #10:#11    // a:I
-
- \#30 = NameAndType    #14:#11    // b:I
-
- \#31 = NameAndType    #15:#16    // c:F
-
- \#32 = NameAndType    #17:#16    // d:F
-
- \#33 = NameAndType    #18:#16    // e:F
-
- \#34 = Utf8        com/gapache/commons/jvm/bytecode/IntAndFloatTest
-
- \#35 = Utf8        java/lang/Object
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%8812.58.54.png)
 
 ​		从结果上可以看到常量池第#13个常量池项(cp_info) 就是CONSTANT_Integer_info,值为10；第#4个常量池项(cp_info) 就是CONSTANT_Float_info,值为11f。
 
@@ -334,81 +264,7 @@ public class LongAndDoubleTest {
 
 ​		我们通过javap -verbose com.gapache.commons.jvm.bytecode.LongAndDoubleTest指令来看一下其常量池中的信息，可以看到虽然我们在代码中写了三次-6076574518398440533L 和三次10.1234567890D，但是常量池中，就只有一个常量-6076574518398440533L和一个常量10.1234567890D，如下所示：
 
-Constant pool:
-
-  \#1 = Methodref     #13.#31    // java/lang/Object."<init>":()V
-
-  \#2 = Long        -6076574518398440533l
-
-  \#4 = Fieldref      #12.#32    // com/gapache/commons/jvm/bytecode/LongAndDoubleTest.a:J
-
-  \#5 = Fieldref      #12.#33    // com/gapache/commons/jvm/bytecode/LongAndDoubleTest.b:J
-
-  \#6 = Fieldref      #12.#34    // com/gapache/commons/jvm/bytecode/LongAndDoubleTest.c:J
-
-  \#7 = Double       10.123456789d
-
-  \#9 = Fieldref      #12.#35    // com/gapache/commons/jvm/bytecode/LongAndDoubleTest.d:D
-
- \#10 = Fieldref      #12.#36    // com/gapache/commons/jvm/bytecode/LongAndDoubleTest.e:D
-
- \#11 = Fieldref      #12.#37    // com/gapache/commons/jvm/bytecode/LongAndDoubleTest.f:D
-
- \#12 = Class       #38      // com/gapache/commons/jvm/bytecode/LongAndDoubleTest
-
- \#13 = Class       #39      // java/lang/Object
-
- \#14 = Utf8        a
-
- \#15 = Utf8        J
-
- \#16 = Utf8        b
-
- \#17 = Utf8        c
-
- \#18 = Utf8        d
-
- \#19 = Utf8        D
-
- \#20 = Utf8        e
-
- \#21 = Utf8        f
-
- \#22 = Utf8        <init>
-
- \#23 = Utf8        ()V
-
- \#24 = Utf8        Code
-
- \#25 = Utf8        LineNumberTable
-
- \#26 = Utf8        LocalVariableTable
-
- \#27 = Utf8        this
-
- \#28 = Utf8        Lcom/gapache/commons/jvm/bytecode/LongAndDoubleTest;
-
- \#29 = Utf8        SourceFile
-
- \#30 = Utf8        LongAndDoubleTest.java
-
- \#31 = NameAndType    #22:#23    // "<init>":()V
-
- \#32 = NameAndType    #14:#15    // a:J
-
- \#33 = NameAndType    #16:#15    // b:J
-
- \#34 = NameAndType    #17:#15    // c:J
-
- \#35 = NameAndType    #18:#19    // d:D
-
- \#36 = NameAndType    #20:#19    // e:D
-
- \#37 = NameAndType    #21:#19    // f:D
-
- \#38 = Utf8        com/gapache/commons/jvm/bytecode/LongAndDoubleTest
-
- \#39 = Utf8        java/lang/Object
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%8812.53.27.png)
 
 ​		常量池第#2个常量池项(cp_info) 就是CONSTANT_Long_info，值为-6076574518398440533L ；第#7个常量池项(cp_info) 就是CONSTANT_Double_info，值为10.1234567890D。
 
@@ -437,69 +293,9 @@ public class StringTest {
 
 ​		我们通过javap -verbose com.gapache.commons.jvm.bytecode.StringTest指令来看一下其常量池中的信息，可以看到CONSTANT_String_info结构体位于常量池的第#2个索引位置。而存放"Java虚拟机原理" 字符串的UTF-8编码格式的字节数组被放到CONSTANT_Utf8_info结构体中，该结构体位于常量池的第#24个索引位置。
 
-Constant pool:
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%881.03.15.png)
 
-  \#1 = Methodref     #8.#23     // java/lang/Object."<init>":()V
-
-  \#2 = String       #24      // JVM原理
-
-  \#3 = Fieldref      #7.#25     // com/gapache/commons/jvm/bytecode/StringTest.s1:Ljava/lang/String;
-
-  \#4 = Fieldref      #7.#26     // com/gapache/commons/jvm/bytecode/StringTest.s2:Ljava/lang/String;
-
-  \#5 = Fieldref      #7.#27     // com/gapache/commons/jvm/bytecode/StringTest.s3:Ljava/lang/String;
-
-  \#6 = Fieldref      #7.#28     // com/gapache/commons/jvm/bytecode/StringTest.s4:Ljava/lang/String;
-
-  \#7 = Class       #29      // com/gapache/commons/jvm/bytecode/StringTest
-
-  \#8 = Class       #30      // java/lang/Object
-
-  \#9 = Utf8        s1
-
- \#10 = Utf8        Ljava/lang/String;
-
- \#11 = Utf8        s2
-
- \#12 = Utf8        s3
-
- \#13 = Utf8        s4
-
- \#14 = Utf8        <init>
-
- \#15 = Utf8        ()V
-
- \#16 = Utf8        Code
-
- \#17 = Utf8        LineNumberTable
-
- \#18 = Utf8        LocalVariableTable
-
- \#19 = Utf8        this
-
- \#20 = Utf8        Lcom/gapache/commons/jvm/bytecode/StringTest;
-
- \#21 = Utf8        SourceFile
-
- \#22 = Utf8        StringTest.java
-
- \#23 = NameAndType    #14:#15    // "<init>":()V
-
- \#24 = Utf8        JVM原理
-
- \#25 = NameAndType    #9:#10     // s1:Ljava/lang/String;
-
- \#26 = NameAndType    #11:#10    // s2:Ljava/lang/String;
-
- \#27 = NameAndType    #12:#10    // s3:Ljava/lang/String;
-
- \#28 = NameAndType    #13:#10    // s4:Ljava/lang/String;
-
- \#29 = Utf8        com/gapache/commons/jvm/bytecode/StringTest
-
- \#30 = Utf8        java/lang/Object
-
-##### 3.2.4 类文件中定义的类名和类中使用到的类在常量池中是怎样被组织和存储的？(CONSTANT_Class_info)
+##### 3.2.5 类文件中定义的类名和类中使用到的类在常量池中是怎样被组织和存储的？(CONSTANT_Class_info)
 
 ​		JVM会将某个Java类中所有使用到了的类的完全限定名以二进制形式的完全限定名封装成CONSTANT_Class_info结构体中，然后将其放置到常量池里。CONSTANT_Class_info 的tag值为 7 。其结构如下：
 
@@ -515,50 +311,161 @@ public class ClassTest {
 }
 ```
 
-​		我们通过javap -verbose com.gapache.commons.jvm.bytecode.ClassTest指令来看一下其常量池中的信息，
+​		我们通过javap -verbose com.gapache.commons.jvm.bytecode.ClassTest指令来看一下其常量池中的信息，可以看到，在ClassTest.class文件的常量池中共有3个CONSTANT_Class_info结构体，分别表示ClassTest中用到的Class信息。我们就看其中一个表示com/gapache/commons/jvm/bytecode/ClassTest的CONSTANT_Class_info结构体。它在常量池中的位置是#5，它指向了常量池的第#21个常量池项。
 
-Constant pool:
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%881.05.31.png)
 
-  \#1 = Methodref     #6.#18     // java/lang/Object."<init>":()V
+​		对于某个类而言，其class文件中至少要有两个CONSTANT_Class_info常量池项，用来表示自己的类信息和其父类信息。（除了
 
-  \#2 = Class       #19      // java/util/Date
+java.lang.Object类除外，其他的任何类都会默认继承自java.lang.Object），如果类声明实现了某些接口，那么接口的信息也会生成对应的
 
-  \#3 = Methodref     #2.#18     // java/util/Date."<init>":()V
+CONSTANT_Class_info常量池项。
 
-  \#4 = Fieldref      #5.#20     // com/gapache/commons/jvm/bytecode/ClassTest.date:Ljava/util/Date;
+​		除此之外，如果在类中使用其他的类，只有真正使用到了相应的类，JDK编译器才会将类的信息组成CONSTANT_Class_info常量池项中。如下图：
 
-  \#5 = Class       #21      // com/gapache/commons/jvm/bytecode/ClassTest
+```java
+public class Other {
 
-  \#6 = Class       #22      // java/lang/Object
+    private Date date;
 
-  \#7 = Utf8        date
+    public Other() {
+        Date da;
+    }
+}
+```
 
-  \#8 = Utf8        Ljava/util/Date;
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%882.12.25.png)
 
-  \#9 = Utf8        <init>
+ 		将类信息放到常量池中的目的，是为了在后续的代码中有可能会反复用到它。很显然，JDK在编译Other类的时候，会解析到Date类有没有用到，发现该类在代码中就没有用到过，所以就认为没有必要将它的信息放到常量池中了。
 
- \#10 = Utf8        ()V
+​		将上述的Other改写一下，仅使用new Date()，如下所示：
 
- \#11 = Utf8        Code
+```java
+public class Other {
 
- \#12 = Utf8        LineNumberTable
+    public Other() {
+        new Date();
+    }
+}
+```
 
- \#13 = Utf8        LocalVariableTable
+​		这时候就可以看到常量池中有表示java/util/Date的常量池项：
 
- \#14 = Utf8        this
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%882.20.05.png)
 
- \#15 = Utf8        Lcom/gapache/commons/jvm/bytecode/ClassTest;
+##### 3.2.6 类中引用到的field字段在常量池中是怎样描述的？(CONSTANT_Fieldref_info, CONSTANT_Name_Type_info)
 
- \#16 = Utf8        SourceFile
+​		一般而言，我们在定义类的过程中会定义一些 field 字段，然后会在这个类的其他地方（如方法中）使用到它。有可能我们在类的方法中只使用field字段一次，也有可能我们会在类定义的方法中使用它很多很多次。
 
- \#17 = Utf8        ClassTest.java
+​		举一个简单的例子，我们定一个叫Person的简单java bean，它有name和age两个field字段，如下所示：
 
- \#18 = NameAndType    #9:#10     // "<init>":()V
+```java
+public class Person {
 
- \#19 = Utf8        java/util/Date
+    private String name;
+    private int age;
 
- \#20 = NameAndType    #7:#8     // date:Ljava/util/Date;
+    public String getName() {
+        return name;
+    }
 
- \#21 = Utf8        com/gapache/commons/jvm/bytecode/ClassTest
+    public void setName(String name) {
+        this.name = name;
+    }
 
- \#22 = Utf8        java/lang/Object
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+```
+
+​		在上面定义的类中，我们在Person类中的一系列方法里，多次引用到name字段和age字段。对于JVM编译器而言，name和age只是一个符号而已，并且由于它可能会在此类中重复出现多次，所以JVM把它当作常量来看待，将name和age以field字段常量的形式保存到常量池中。
+
+​		将它name和age封装成CONSTANT_Fieldref_info常量池项，放到常量池中，在类中引用到它的地方，直接放置一个指向field字段所在常量池的索引。
+
+​		  使用javap -verbose com.gapache.commons.jvm.bytecode.Person，查看class文件的信息，你会看到，在Person类中引用到age和name字段的地方，都是指向了常量池中age和name字段对应的常量池项中。表示field字段的常量池项叫做CONSTANT_Field_info。如下所示：
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%883.00.19.png)
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%883.00.32.png)
+
+​		怎样描述一个field字段的引用？
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/753271-20170310102335297-130978447.png)
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/753271-20170310102613000-1211659752.png)
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/753271-20170310102623141-1625084358.png)
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/753271-20170310102722578-1808156508.png)
+
+​		（PS：如果我们在类中定义了field字段，但是没有在类中的其他地方用到这些字段，它是不会被编译器放到常量池中的。读者可以字节试一下。）
+
+##### 3.2.7 类中引用到的method方法在常量池中是怎样描述的？(CONSTANT_Methodref_info, CONSTANT_Name_Type_info)
+
+​		还是以Person类为例。在Person中我们定义了SetName(String name)、getName()、setAge(int age)、getAge()这些方法。虽然我们定义了方法，但是这些方法没有在类中的其他地方被用到，所以它们的方法引用信息并不会放到常量中。现在我们在类中加一个方法getInfo()，调用了getName()和getAge()方法：
+
+```java
+public String getInfo() {
+  	return getName() + "\t" + getAge();
+}
+```
+
+​		使用javap -verbose com.gapache.commons.jvm.bytecode.Person，查看class文件的信息，我们会看到，这时候JVM编译器会将getName()和getAge()方法的引用信息包装成CONSTANT_Methodref_info结构体放入到常量池之中。
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%883.37.05.png)
+
+​		（PS： 这里的方法调用的方式牵涉到Java非常重要的一个术语和机制，叫动态绑定。这个动态绑定问题以后在单独谈谈。）
+
+​		怎样表示一个方法引用？
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/753271-20170310103612875-1701964407.png)
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/753271-20170310103622641-1587115112.png)
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/753271-20170310103632078-1256968219.png)
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/753271-20170310103757438-189877104.png)
+
+##### 3.2.8 类中引用到某个接口中定义的method方法在常量池中是怎样描述的？(CONSTANT_InterfaceMethodref_info，CONSTANT_Name_Type_info)
+
+​		当我们在某个类中使用到了某个接口中的方法，JVM会将用到的接口中的方法信息放到这个类的常量池中。比如我们定义了一个Worker接口，和一个Boss类，在Boss类中调用了Worker接口中的方法，这时候在Boss类的常量池中会有Worker接口的方法的引用表示。
+
+```java
+public interface Worker {
+
+    void work();
+}
+```
+
+```java
+public class Boss {
+
+    public void makeMoney(Worker worker) {
+        worker.work();
+    }
+}
+```
+
+​		使用javap -verbose com.gapache.commons.jvm.bytecode.Boss，然后会看到如下信息：
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%883.55.08.png)
+
+​		如上图所示，在Boss类的makeMoney()方法中调用了Worker接口的work()方法，机器指令是通过invokeinterface指令完成的。
+
+​		invokeinterface指令后面的操作数，是指向了Boss常量池中Worker接口的work()方法描述，表示的意思就是：“我要调用Worker接口的work()方法”。Worker接口的work()方法引用信息，JVM会使用CONSTANT_InterfaceMethodref_info结构体来描述，CONSTANT_InterfaceMethodref_info定义如下：
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/753271-20170310104422734-406388717.png)
+
+​		CONSTANT_InterfaceMethodref_info结构体和上面介绍的CONSTANT_Methodref_info 结构体很基本上相同，它们的不同点只有：
+
+1. CONSTANT_InterfaceMethodref_info 的tag 值为11，而CONSTANT_Methodref_info的tag值为10；
+2. CONSTANT_InterfaceMethodref_info 描述的是接口中定义的方法，而CONSTANT_Methodref_info描述的是实例类中的方法。
+
+##### 3.2.9 CONSTANT_MethodType_info，CONSTANT_MethodHandle_info，CONSTANT_InvokeDynamic_info
+
+​		这三项主要是为了让Java语言支持动态语言特性而在Java 7 版本中新增的三个常量池项，只会在极其特别的情况能用到它，在class文件中几乎不会生成这三个常量池项。
