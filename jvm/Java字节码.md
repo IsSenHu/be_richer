@@ -125,6 +125,36 @@ SourceFile: "MyTest1.java"
 
 ![](https://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-19%E4%B8%8B%E5%8D%882.56.47.png)
 
+#### 1.3 Java字节码整体结构
+
+|      类型      |                名称                |          数量           |
+| :------------: | :--------------------------------: | :---------------------: |
+|       u4       |           magic（魔数）            |            1            |
+|       u2       |     minor_version（次版本号）      |            1            |
+|       u2       |     major_version（主版本号）      |            1            |
+|       u2       |  constant_pool_count（常量个数）   |            1            |
+|    cp_info     |     constant_pool（常量池表）      | constant_pool_count - 1 |
+|       u2       |  access_flags（类的访问控制权限）  |            1            |
+|       u2       |         this_class（类名）         |            1            |
+|       u2       |       super_class（父类名）        |            1            |
+|       u2       |    interfaces_count（接口个数）    |            1            |
+|       u2       |        interfaces（接口名）        |    interfaces_count     |
+|       u2       |       fields_count（域个数）       |            1            |
+|   field_info   |          fields（域的表）          |      fields_count       |
+|       u2       |    methods_conut（方法的个数）     |            1            |
+|  method_info   |         methods（方法表）          |      methods_conut      |
+|       u2       | attributes_count（附加属性的个数） |            1            |
+| attribute_info |     attributes（附加属性的表）     |    attributes_count     |
+
+#### 1.4 Class字节码中有两种数据类型
+
+- 字节数据直接量：这是基本的数据类型。共细分为u1、u2、u4、u8四种，分别代表连续的1个字节、2个字节、4个字节、8个字节组成的整体数据。
+- 表（数组）：表是由多个基本数据或其他表，按照既定顺序组成的大的数据集合。表是有结构的，它的结构体现在：组成表的成分所在的位置和顺序都是已经严格定义好的。
+
+#### 1.5 字节码查看工具jclasslib
+
+​		idea可以直接安装插件来使用。
+
 ### 二、魔数以及版本信息
 
 #### 2.1 魔数
@@ -177,7 +207,7 @@ cp_info {
 
 #### 3.2  描述
 
-##### **3.2.1 描述信息**
+##### 3.2.1 描述信息
 
 ​		**在JVM规范中，每个变量/字段都有描述信息，描述信息主要的作用是描述字段的数据类型、方法的参数列表（包括数量、类型与顺序）与返回值。根据描述符规则，基本数据类型和代表无返回值的void类型都用一个大写字符来表示，对象类型则使用字符L加对象的全限定名称来表示。如下所示：**
 
@@ -469,3 +499,118 @@ public class Boss {
 ##### 3.2.9 CONSTANT_MethodType_info，CONSTANT_MethodHandle_info，CONSTANT_InvokeDynamic_info
 
 ​		这三项主要是为了让Java语言支持动态语言特性而在Java 7 版本中新增的三个常量池项，只会在极其特别的情况能用到它，在class文件中几乎不会生成这三个常量池项。
+
+###   三、字节码访问标志与字段表
+
+#### 3.1 Access_Flag 访问标志
+
+|   Flag Name    | Value  |                        Interpretation                        |
+| :------------: | :----: | :----------------------------------------------------------: |
+|   ACC_PUBLIC   | 0x0001 |  Declared public; may be accessed from outside its package.  |
+|   ACC_FINAL    | 0x0010 |            Declared final;no subclasses allowed.             |
+|   ACC_SUPER    | 0x0020 | Treat superclass methods specially when invoked by the invokespecial instruction. |
+| ACC_INTERFACE  | 0x0200 |                Is an interface, not a class.                 |
+|  ACC_ABSTRACT  | 0x0400 |         Declared abstract; must not be instantiated.         |
+| ACC_SYNTHETIC  | 0x1000 |      Declared synthetic;not present in the source code.      |
+| ACC_ANNOTATION | 0x2000 |               Declared as an annotation type.                |
+|    ACC_ENUM    | 0x4000 |                  Declared as an enum type.                   |
+
+#### 3.2 字段表集合
+
+​		字段表用于描述类和接口中声明的变量。这里的字段包含了类级别变量以及实例变量，但是不包括方法内部声明的局部变量。
+
+```java
+field_info {
+  u2 access_flags;
+  u2 name_index;
+  u2 descriptor_index;
+  u2 attributes_count;
+  attribute_info attributes[attributes_count];
+}
+```
+
+### 四、方法表与属性表
+
+#### 4.1  方法表
+
+```java
+method_info {
+  u2 access_flags;
+  u2 name_index;
+  u2 descriptor_index;
+  u2 attributes_count;
+  attribute_info attributes[attributes_count];
+}
+```
+
+​		  方法中的每个属性都是一个attribute_info结构
+
+```java
+attribute_info {
+  u2 attribute_name_index;
+  u4 attribute_length;
+  u1 info[attribute_length];
+}
+```
+
+- JVM预定义类部分attribute，但是编译器自己也可以实现自己的attribute写入class文件里，供运行时使用。
+
+- 不同的attribute通过attribute_name_index来区分。
+
+- Code attribute的作用是保存该方法的结构，如所对应的字节码：
+
+  ```java
+  Code_attribute {
+    u2 attribute_name_index;
+    u4 attribute_length;
+    u2 max_stack;
+    u2 max_locals;
+    u4 code_length;
+    u1 code[code_length];
+    u2 exception_table_length;
+    {
+      u2 start_pc;
+      u2 end_pc;
+      u2 handler_pc;
+      u2 catch_type;
+    } exception_table[exception_table_length];
+    u2 attributes_count;
+    attribute_info attributes[attributes_count];
+  }
+  ```
+
+- attribute_length表示attribute所包含的字节数，不包含attribute_name_index和attribute_length字段。
+
+- max_stack表示这个方法运行的任何时刻所能达到的操作数栈的最大深度。
+
+- max_locals表示方法执行期间创建的局部变量的数目，包含用来表示传入的参数的局部变量。
+
+- code_length表示改方法所包含的字节码的字节数以及具体的指令码。
+
+- 具体字节码即是该方法被调用时，虚拟机所执行的字节码。
+
+- exception_table，这里存放的是处理异常的信息。
+
+- 每个exception_table表项由start_pc，end_pc，handler_pc，catch_type组成。
+
+- start_pc和end_pc表示在code数组中的从start_pc到end_pc处（包含start_pc，不包含end_pc）的指令抛出的异常会由这个表项来处理。
+
+- handler_pc表示处理异常的代码的开始处。catch_type表示会被处理的异常类型，它指向常量池里的一个异常类。当catch_type为0时，表示处理所有的异常。
+
+  接下来就是该方法的附加属性：
+
+- LineNumberTable：这个属性用来表示code数组中的字节码和Java代码行数之间的关系。这个属性可以用来在调试的时候定位代码所执行的行数。
+
+  ```java
+  LineNumberTable_attribute {
+  	u2 attribute_name_index;
+    u4 attribute_length;
+    u2 line_number_table_length;
+    {
+      u2 start_pc;
+      u2 line_number;
+    } line_number_table[line_number_table_length];
+  }
+  ```
+
+  
