@@ -496,9 +496,69 @@ public class Boss {
 1. CONSTANT_InterfaceMethodref_info 的tag 值为11，而CONSTANT_Methodref_info的tag值为10；
 2. CONSTANT_InterfaceMethodref_info 描述的是接口中定义的方法，而CONSTANT_Methodref_info描述的是实例类中的方法。
 
-##### 3.2.9 CONSTANT_MethodType_info，CONSTANT_MethodHandle_info，CONSTANT_InvokeDynamic_info
+##### 3.2.9 CONSTANT_MethodHandle_info
 
-​		这三项主要是为了让Java语言支持动态语言特性而在Java 7 版本中新增的三个常量池项，只会在极其特别的情况能用到它，在class文件中几乎不会生成这三个常量池项。
+```java
+CONSTANT_MethodHandle_info {
+  u1 tag;
+  u1 reference_kind;
+  u2 reference_index;
+}
+```
+
+​		reference_kind是一个1到9之间的整数，具体含义可以参考 JVM规范。reference_index是常量池索引，但具体索引的是什么类型的常量，需要看reference_kind：
+
+|       constant_pool entry        |                        reference_kind                        |
+| :------------------------------: | :----------------------------------------------------------: |
+|      CONSTANT_Fieldref_info      | 1 (REF_getField), 2 (REF_getStatic), 3 (REF_putField), or 4 (REF_putStatic) |
+|     CONSTANT_Methodref_info      | 5 (REF_invokeVirtual), 6 (REF_invokeStatic), 7 (REF_invokeSpecial), or 8 (REF_newInvokeSpecial) |
+| CONSTANT_InterfaceMethodref_info |                   9 (REF_invokeInterface)                    |
+
+##### 3.2.10 CONSTANT_MethodType_info
+
+```java
+CONSTANT_MethodType_info {
+  u1 tag;
+  u2 descriptor_index;
+}
+```
+
+##### 3.2.11 CONSTANT_InvokeDynamic_info
+
+```java
+CONSTANT_InvokeDynamic_info {
+	u1 tag;
+  u2 bootstrap_method_attr_index;
+  u2 name_and_type_index;
+}
+```
+
+​		bootstrap_method_attr_index索引bootstrap_methods表，bootstrap_methods位于class文件的attributes表里。
+
+​		JVM规范规定，如果类的常量池中存在CONSTANT_InvokeDynamic_info的话，那么attributes表中就必定**有且仅有一个**BootstrapMethods属性。BootstrapMethods属性是个变长的表，结构如下所示：
+
+```java
+BootstrapMethods_attribute {
+	u2 attribute_name_index;
+  u4 attribute_length;
+  u2 num_bootstrap_methods;
+  {   u2 bootstrap_method_ref;
+      u2 num_bootstrap_arguments;
+      u2 bootstrap_arguments[num_bootstrap_arguments];
+  } bootstrap_methods[num_bootstrap_methods];
+}
+```
+
+​		每一个BootstrapMethod都包含一个bootstrap_method_ref和n个bootstrap_arguments。bootstrap_method_ref是个常量池索引，指向一个 **CONSTANT_MethodHandle_info**。而每一个bootstrap_argument也都是常量池索引，可以指向下面这些结构：
+
+- CONSTANT_String_info
+- CONSTANT_Class_info
+- CONSTANT_Integer_info
+- CONSTANT_Long_info
+- CONSTANT_Float_info
+- CONSTANT_Double_info
+- CONSTANT_MethodHandle_info
+- CONSTANT_MethodType_info
 
 ###   三、字节码访问标志与字段表
 
