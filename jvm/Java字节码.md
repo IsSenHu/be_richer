@@ -11,6 +11,7 @@
 - javap com.gapache.commons.jvm.bytecode.MyTest1
 - javap -c com.gapache.commons.jvm.bytecode.MyTest1
 - javap -verbose com.gapache.commons.jvm.bytecode.MyTest1
+- javap -verbose -p 可以打印出私有的信息 
 
 ​		这3条命令都可以用来分析字节码文件，使用javap -verbose命令分析一个字节码文件时，将会分析该字节码文件的魔数、版本号、常量池、类信息、类的构造方法、类中的方法信息、类变量与成员变量等信息。我们先准备下面的一个Java类：
 
@@ -31,6 +32,7 @@ public class MyTest1 {
 
 ​		将MyTest1.java文件编译成class文件，运行javap -verbose com.gapache.commons.jvm.bytecode.MyTest1，控制台输出如下所示：
 
+```java
 Classfile /Users/macos/Documents/codes/mine/big-plan/base/commons/target/classes/com/gapache/commons/jvm/bytecode/MyTest1.class
   Last modified 2020-3-18; size 541 bytes
   MD5 checksum d49f7672a012f838d88fa0df4d3b1cdf
@@ -118,6 +120,9 @@ Constant pool:
       a
 }
 SourceFile: "MyTest1.java"
+```
+
+
 
 #### 1.2  Hex Fiend工具
 
@@ -506,7 +511,9 @@ CONSTANT_MethodHandle_info {
 }
 ```
 
-​		reference_kind是一个1到9之间的整数，具体含义可以参考 JVM规范。reference_index是常量池索引，但具体索引的是什么类型的常量，需要看reference_kind：
+​		reference_kind是一个1到9之间的整数，具体含义可以参考 JVM规范。reference_index是常量池索引，但具体索引的是什么类型的常量，需要看re
+
+REF：
 
 |       constant_pool entry        |                        reference_kind                        |
 | :------------------------------: | :----------------------------------------------------------: |
@@ -673,4 +680,150 @@ attribute_info {
   }
   ```
 
+  ### 五、synchronized关键字
   
+  ​		写3个被synchronized修饰的方法如下：
+  
+  ```java
+  public class MyTest2 {
+    
+  		String str = "Welcome";
+  
+      private int x = 5;
+  
+      public static Integer in = 10;
+  
+      private final Object object = new Object();
+    
+      private synchronized void setX(int x) {
+          this.x = x;
+      }
+  
+      private void test(String str) {
+          synchronized (this.object) {
+              System.out.println("hello world");
+          }
+      }
+  
+      private synchronized static void test2() {
+  
+      }
+  }
+  ```
+  
+  ​		然后我们运行javap -verbose -p 命令得到如下结果：
+  
+  ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WechatIMG1.png)
+  
+  ​		可以看到，如果synchronized修饰方法，code上没有任何变化。而如果是使用synchronized修饰代码块，则会看到monitorenter和monitorexit这两个助记符。
+  
+  ### 六、构造方法和静态代码块字节码指令详解
+  
+  ​		这里可以看到Methods中有<init>和<clinit>方法。
+  
+  ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-164835.png)
+  
+  - 构造方法：<init>
+  
+    ​		非静态成员变量的初始化实际不是在声明的位置进行赋值的的，而是在编译器默认生成的构造方法中完成赋值的，就算自己编写了构造方法，那也会在那也会在每个构造方法中完成赋值。编译器会将这些成员变量赋值的字节码指令放到构造方法中。
+  
+    ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-164108.png)
+  
+  - 静态属性初始化：<clinit>
+  
+    ​	所有的静态成员初始化都会被移到这个方法中，按照从上到下的顺序。
+  
+    ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-165626.png)
+
+### 七、Java字节码对于异常的处理方式
+
+1. 统一采用异常表的方式来对异常进行处理。
+
+2. 在jdk1.4.2之前的版本中，并是不使用异常表的方式来对异常进行处理的，而是采用特定的指令方式。
+
+3. 当异常处理存在finally语句块时，现代化的JVM采取的处理方式是将finally语句块的字节码拼接到每一个catch块后面。
+
+   ​	我们编写如下所示代码：
+
+   ```java
+   public class MyTest3 {
+   
+       public void test() throws IOException, FileNotFoundException, NullPointerException {
+           try {
+               InputStream is = new FileInputStream("test.txt");
+               ServerSocket serverSocket = new ServerSocket(9999);
+               serverSocket.accept();
+           } catch (FileNotFoundException e) {
+               System.err.println(e.getMessage());
+           } catch (IOException e) {
+               e.printStackTrace();
+           } catch (Exception e) {
+               System.err.println(e.getLocalizedMessage());
+           } finally {
+               System.out.println("finally");
+           }
+       }
+   }
+   ```
+
+    然后我们运行javap -verbose，可以看到标红的部分就是finally语句块的被拼接到了每个catch块后面。
+
+   ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-170711.png)
+
+   这是异常表。
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-170809.png)
+
+ ### 八、编译后每一个实例方法的第一个参数都是this
+
+​		编译后每一个实例方法的第一个参数都是this，方法参数的数量总是会比源代码中方法参数的数量多一个，所以在实例方法的局部变量表中，至少会有一个指向当前对象的局部变量。如下图所示，明明源代码中方法的参数为0个，但是编译后显示参数数量为1：
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-171605.png)
+
+​	 	在局部变量表中，也可以看到this，如下所示：
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-171849.png)
+
+### 九、栈帧、直接引用以及符号引用
+
+- 栈帧（stack frame）：用于帮助虚拟机执行方法调用与方法执行的数据结构。封装了方法的局部变量表、动态链接信息、方法的返回地址以及操作数栈等信息。
+- 直接引用：就是直接指向了地址
+
+- 符号引用：通过将直接引用的赋值给符号，代码中可直接使用符号来代替直接引用。有些符号引用是在类加载阶段或事第一次使用时就会转换为直接引用，这种转换叫做静态解析；另外一些符号引用则是在每次运行期转换为直接引用，这种转换叫做动态链接，这体现为Java的多态性，如下面的伪代码：
+
+  ```java
+  Animal a = new Cat();
+  a.sleep();
+  a = new Dog();
+  a.sleep();
+  a = new Tiger();
+  a.sleep();
+  // 在程序的字节码中，我们能看到的都是调用的父类Animal的sleep()方法
+  // 通过invokevirtual，下节会讲
+  ```
+
+  ### 十、方法重载与invokevirtual字节码指令
+
+  我们先认识一下一些调用方法的指令：
+
+  1. invokeinterface：调用接口中的方法，实际上是在运行期决定的，决定到底调用实现改接口的哪个对象的特定方法。
+
+  2. invokestatic：调用静态方法。
+
+  3. invokespecial：调用自己的私有方法、构造方法以及父类的方法。
+
+  4. invokevirtual：调用虚方法，运行期动态查找的过程。
+
+  5. invokedynamic：动态调用方法。
+
+  ------
+
+  静态解析的4种情形：
+
+  		1. 静态方法
+    		2. 父类方法
+    		3. 构造方法
+    		4. 私有方法
+
+  以上4类方法称作非虚方法，他们是在类加载阶段就可以将符号引用转换为直接引用的。
+
