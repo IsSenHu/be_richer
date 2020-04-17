@@ -503,6 +503,8 @@ public class Boss {
 
 ##### 3.2.9 CONSTANT_MethodHandle_info
 
+
+
 ```java
 CONSTANT_MethodHandle_info {
   u1 tag;
@@ -581,6 +583,7 @@ BootstrapMethods_attribute {
 | ACC_SYNTHETIC  | 0x1000 |      Declared synthetic;not present in the source code.      |
 | ACC_ANNOTATION | 0x2000 |               Declared as an annotation type.                |
 |    ACC_ENUM    | 0x4000 |                  Declared as an enum type.                   |
+|                |        |                                                              |
 
 #### 3.2 字段表集合
 
@@ -821,10 +824,9 @@ attribute_info {
   静态解析的4种情形：
 
   1. 静态方法
-
-       		2. 父类方法
-       		3. 构造方法
-       		4. 私有方法
+  2. 父类方法
+  3. 构造方法
+  4. 私有方法
 
   以上4类方法称作非虚方法，他们是在类加载阶段就可以将符号引用转换为直接引用的。
 
