@@ -11,6 +11,7 @@
 - javap com.gapache.commons.jvm.bytecode.MyTest1
 - javap -c com.gapache.commons.jvm.bytecode.MyTest1
 - javap -verbose com.gapache.commons.jvm.bytecode.MyTest1
+- javap -verbose -p 可以打印出私有的信息 
 
 ​		这3条命令都可以用来分析字节码文件，使用javap -verbose命令分析一个字节码文件时，将会分析该字节码文件的魔数、版本号、常量池、类信息、类的构造方法、类中的方法信息、类变量与成员变量等信息。我们先准备下面的一个Java类：
 
@@ -31,6 +32,7 @@ public class MyTest1 {
 
 ​		将MyTest1.java文件编译成class文件，运行javap -verbose com.gapache.commons.jvm.bytecode.MyTest1，控制台输出如下所示：
 
+```java
 Classfile /Users/macos/Documents/codes/mine/big-plan/base/commons/target/classes/com/gapache/commons/jvm/bytecode/MyTest1.class
   Last modified 2020-3-18; size 541 bytes
   MD5 checksum d49f7672a012f838d88fa0df4d3b1cdf
@@ -118,12 +120,45 @@ Constant pool:
       a
 }
 SourceFile: "MyTest1.java"
+```
+
+
 
 #### 1.2  Hex Fiend工具
 
 ​		Hex Fiend是十六进制编辑器，可以用来显示.class文件的十六进制内容，我们先用Hex Fiend打开MyTest1.class文件，并在Views下将Byte Grouping设置为Single，如下图所示：
 
 ![](https://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-19%E4%B8%8B%E5%8D%882.56.47.png)
+
+#### 1.3 Java字节码整体结构
+
+|      类型      |                名称                |          数量           |
+| :------------: | :--------------------------------: | :---------------------: |
+|       u4       |           magic（魔数）            |            1            |
+|       u2       |     minor_version（次版本号）      |            1            |
+|       u2       |     major_version（主版本号）      |            1            |
+|       u2       |  constant_pool_count（常量个数）   |            1            |
+|    cp_info     |     constant_pool（常量池表）      | constant_pool_count - 1 |
+|       u2       |  access_flags（类的访问控制权限）  |            1            |
+|       u2       |         this_class（类名）         |            1            |
+|       u2       |       super_class（父类名）        |            1            |
+|       u2       |    interfaces_count（接口个数）    |            1            |
+|       u2       |        interfaces（接口名）        |    interfaces_count     |
+|       u2       |       fields_count（域个数）       |            1            |
+|   field_info   |          fields（域的表）          |      fields_count       |
+|       u2       |    methods_conut（方法的个数）     |            1            |
+|  method_info   |         methods（方法表）          |      methods_conut      |
+|       u2       | attributes_count（附加属性的个数） |            1            |
+| attribute_info |     attributes（附加属性的表）     |    attributes_count     |
+
+#### 1.4 Class字节码中有两种数据类型
+
+- 字节数据直接量：这是基本的数据类型。共细分为u1、u2、u4、u8四种，分别代表连续的1个字节、2个字节、4个字节、8个字节组成的整体数据。
+- 表（数组）：表是由多个基本数据或其他表，按照既定顺序组成的大的数据集合。表是有结构的，它的结构体现在：组成表的成分所在的位置和顺序都是已经严格定义好的。
+
+#### 1.5 字节码查看工具jclasslib
+
+​		idea可以直接安装插件来使用。
 
 ### 二、魔数以及版本信息
 
@@ -177,7 +212,7 @@ cp_info {
 
 #### 3.2  描述
 
-##### **3.2.1 描述信息**
+##### 3.2.1 描述信息
 
 ​		**在JVM规范中，每个变量/字段都有描述信息，描述信息主要的作用是描述字段的数据类型、方法的参数列表（包括数量、类型与顺序）与返回值。根据描述符规则，基本数据类型和代表无返回值的void类型都用一个大写字符来表示，对象类型则使用字符L加对象的全限定名称来表示。如下所示：**
 
@@ -466,6 +501,332 @@ public class Boss {
 1. CONSTANT_InterfaceMethodref_info 的tag 值为11，而CONSTANT_Methodref_info的tag值为10；
 2. CONSTANT_InterfaceMethodref_info 描述的是接口中定义的方法，而CONSTANT_Methodref_info描述的是实例类中的方法。
 
-##### 3.2.9 CONSTANT_MethodType_info，CONSTANT_MethodHandle_info，CONSTANT_InvokeDynamic_info
+##### 3.2.9 CONSTANT_MethodHandle_info
 
-​		这三项主要是为了让Java语言支持动态语言特性而在Java 7 版本中新增的三个常量池项，只会在极其特别的情况能用到它，在class文件中几乎不会生成这三个常量池项。
+
+
+```java
+CONSTANT_MethodHandle_info {
+  u1 tag;
+  u1 reference_kind;
+  u2 reference_index;
+}
+```
+
+​		reference_kind是一个1到9之间的整数，具体含义可以参考 JVM规范。reference_index是常量池索引，但具体索引的是什么类型的常量，需要看re
+
+REF：
+
+|       constant_pool entry        |                        reference_kind                        |
+| :------------------------------: | :----------------------------------------------------------: |
+|      CONSTANT_Fieldref_info      | 1 (REF_getField), 2 (REF_getStatic), 3 (REF_putField), or 4 (REF_putStatic) |
+|     CONSTANT_Methodref_info      | 5 (REF_invokeVirtual), 6 (REF_invokeStatic), 7 (REF_invokeSpecial), or 8 (REF_newInvokeSpecial) |
+| CONSTANT_InterfaceMethodref_info |                   9 (REF_invokeInterface)                    |
+
+##### 3.2.10 CONSTANT_MethodType_info
+
+```java
+CONSTANT_MethodType_info {
+  u1 tag;
+  u2 descriptor_index;
+}
+```
+
+##### 3.2.11 CONSTANT_InvokeDynamic_info
+
+```java
+CONSTANT_InvokeDynamic_info {
+	u1 tag;
+  u2 bootstrap_method_attr_index;
+  u2 name_and_type_index;
+}
+```
+
+​		bootstrap_method_attr_index索引bootstrap_methods表，bootstrap_methods位于class文件的attributes表里。
+
+​		JVM规范规定，如果类的常量池中存在CONSTANT_InvokeDynamic_info的话，那么attributes表中就必定**有且仅有一个**BootstrapMethods属性。BootstrapMethods属性是个变长的表，结构如下所示：
+
+```java
+BootstrapMethods_attribute {
+	u2 attribute_name_index;
+  u4 attribute_length;
+  u2 num_bootstrap_methods;
+  {   u2 bootstrap_method_ref;
+      u2 num_bootstrap_arguments;
+      u2 bootstrap_arguments[num_bootstrap_arguments];
+  } bootstrap_methods[num_bootstrap_methods];
+}
+```
+
+​		每一个BootstrapMethod都包含一个bootstrap_method_ref和n个bootstrap_arguments。bootstrap_method_ref是个常量池索引，指向一个 **CONSTANT_MethodHandle_info**。而每一个bootstrap_argument也都是常量池索引，可以指向下面这些结构：
+
+- CONSTANT_String_info
+- CONSTANT_Class_info
+- CONSTANT_Integer_info
+- CONSTANT_Long_info
+- CONSTANT_Float_info
+- CONSTANT_Double_info
+- CONSTANT_MethodHandle_info
+- CONSTANT_MethodType_info
+
+###   三、字节码访问标志与字段表
+
+#### 3.1 Access_Flag 访问标志
+
+|   Flag Name    | Value  |                        Interpretation                        |
+| :------------: | :----: | :----------------------------------------------------------: |
+|   ACC_PUBLIC   | 0x0001 |  Declared public; may be accessed from outside its package.  |
+|   ACC_FINAL    | 0x0010 |            Declared final;no subclasses allowed.             |
+|   ACC_SUPER    | 0x0020 | Treat superclass methods specially when invoked by the invokespecial instruction. |
+| ACC_INTERFACE  | 0x0200 |                Is an interface, not a class.                 |
+|  ACC_ABSTRACT  | 0x0400 |         Declared abstract; must not be instantiated.         |
+| ACC_SYNTHETIC  | 0x1000 |      Declared synthetic;not present in the source code.      |
+| ACC_ANNOTATION | 0x2000 |               Declared as an annotation type.                |
+|    ACC_ENUM    | 0x4000 |                  Declared as an enum type.                   |
+|                |        |                                                              |
+
+#### 3.2 字段表集合
+
+​		字段表用于描述类和接口中声明的变量。这里的字段包含了类级别变量以及实例变量，但是不包括方法内部声明的局部变量。
+
+```java
+field_info {
+  u2 access_flags;
+  u2 name_index;
+  u2 descriptor_index;
+  u2 attributes_count;
+  attribute_info attributes[attributes_count];
+}
+```
+
+### 四、方法表与属性表
+
+#### 4.1  方法表
+
+```java
+method_info {
+  u2 access_flags;
+  u2 name_index;
+  u2 descriptor_index;
+  u2 attributes_count;
+  attribute_info attributes[attributes_count];
+}
+```
+
+​		  方法中的每个属性都是一个attribute_info结构
+
+```java
+attribute_info {
+  u2 attribute_name_index;
+  u4 attribute_length;
+  u1 info[attribute_length];
+}
+```
+
+- JVM预定义类部分attribute，但是编译器自己也可以实现自己的attribute写入class文件里，供运行时使用。
+
+- 不同的attribute通过attribute_name_index来区分。
+
+- Code attribute的作用是保存该方法的结构，如所对应的字节码：
+
+  ```java
+  Code_attribute {
+    u2 attribute_name_index;
+    u4 attribute_length;
+    u2 max_stack;
+    u2 max_locals;
+    u4 code_length;
+    u1 code[code_length];
+    u2 exception_table_length;
+    {
+      u2 start_pc;
+      u2 end_pc;
+      u2 handler_pc;
+      u2 catch_type;
+    } exception_table[exception_table_length];
+    u2 attributes_count;
+    attribute_info attributes[attributes_count];
+  }
+  ```
+
+- attribute_length表示attribute所包含的字节数，不包含attribute_name_index和attribute_length字段。
+
+- max_stack表示这个方法运行的任何时刻所能达到的操作数栈的最大深度。
+
+- max_locals表示方法执行期间创建的局部变量的数目，包含用来表示传入的参数的局部变量。
+
+- code_length表示改方法所包含的字节码的字节数以及具体的指令码。
+
+- 具体字节码即是该方法被调用时，虚拟机所执行的字节码。
+
+- exception_table，这里存放的是处理异常的信息。
+
+- 每个exception_table表项由start_pc，end_pc，handler_pc，catch_type组成。
+
+- start_pc和end_pc表示在code数组中的从start_pc到end_pc处（包含start_pc，不包含end_pc）的指令抛出的异常会由这个表项来处理。
+
+- handler_pc表示处理异常的代码的开始处。catch_type表示会被处理的异常类型，它指向常量池里的一个异常类。当catch_type为0时，表示处理所有的异常。
+
+  接下来就是该方法的附加属性：
+
+- LineNumberTable：这个属性用来表示code数组中的字节码和Java代码行数之间的关系。这个属性可以用来在调试的时候定位代码所执行的行数。
+
+  ```java
+  LineNumberTable_attribute {
+  	u2 attribute_name_index;
+    u4 attribute_length;
+    u2 line_number_table_length;
+    {
+      u2 start_pc;
+      u2 line_number;
+    } line_number_table[line_number_table_length];
+  }
+  ```
+
+  ### 五、synchronized关键字
+  
+  ​		写3个被synchronized修饰的方法如下：
+  
+  ```java
+  public class MyTest2 {
+    
+  		String str = "Welcome";
+  
+      private int x = 5;
+  
+      public static Integer in = 10;
+  
+      private final Object object = new Object();
+    
+      private synchronized void setX(int x) {
+          this.x = x;
+      }
+  
+      private void test(String str) {
+          synchronized (this.object) {
+              System.out.println("hello world");
+          }
+      }
+  
+      private synchronized static void test2() {
+  
+      }
+  }
+  ```
+  
+  ​		然后我们运行javap -verbose -p 命令得到如下结果：
+  
+  ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WechatIMG1.png)
+  
+  ​		可以看到，如果synchronized修饰方法，code上没有任何变化。而如果是使用synchronized修饰代码块，则会看到monitorenter和monitorexit这两个助记符。
+  
+  ### 六、构造方法和静态代码块字节码指令详解
+  
+  ​		这里可以看到Methods中有<init>和<clinit>方法。
+  
+  ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-164835.png)
+  
+  - 构造方法：<init>
+  
+    ​		非静态成员变量的初始化实际不是在声明的位置进行赋值的的，而是在编译器默认生成的构造方法中完成赋值的，就算自己编写了构造方法，那也会在那也会在每个构造方法中完成赋值。编译器会将这些成员变量赋值的字节码指令放到构造方法中。
+  
+    ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-164108.png)
+  
+  - 静态属性初始化：<clinit>
+  
+    ​	所有的静态成员初始化都会被移到这个方法中，按照从上到下的顺序。
+  
+    ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-165626.png)
+
+### 七、Java字节码对于异常的处理方式
+
+1. 统一采用异常表的方式来对异常进行处理。
+
+2. 在jdk1.4.2之前的版本中，并是不使用异常表的方式来对异常进行处理的，而是采用特定的指令方式。
+
+3. 当异常处理存在finally语句块时，现代化的JVM采取的处理方式是将finally语句块的字节码拼接到每一个catch块后面。
+
+   ​	我们编写如下所示代码：
+
+   ```java
+   public class MyTest3 {
+   
+       public void test() throws IOException, FileNotFoundException, NullPointerException {
+           try {
+               InputStream is = new FileInputStream("test.txt");
+               ServerSocket serverSocket = new ServerSocket(9999);
+               serverSocket.accept();
+           } catch (FileNotFoundException e) {
+               System.err.println(e.getMessage());
+           } catch (IOException e) {
+               e.printStackTrace();
+           } catch (Exception e) {
+               System.err.println(e.getLocalizedMessage());
+           } finally {
+               System.out.println("finally");
+           }
+       }
+   }
+   ```
+
+    然后我们运行javap -verbose，可以看到标红的部分就是finally语句块的被拼接到了每个catch块后面。
+
+   ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-170711.png)
+
+   这是异常表。
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-170809.png)
+
+ ### 八、编译后每一个实例方法的第一个参数都是this
+
+​		编译后每一个实例方法的第一个参数都是this，方法参数的数量总是会比源代码中方法参数的数量多一个，所以在实例方法的局部变量表中，至少会有一个指向当前对象的局部变量。如下图所示，明明源代码中方法的参数为0个，但是编译后显示参数数量为1：
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-171605.png)
+
+​	 	在局部变量表中，也可以看到this，如下所示：
+
+![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/WX20200413-171849.png)
+
+### 九、栈帧、直接引用以及符号引用
+
+- 栈帧（stack frame）：用于帮助虚拟机执行方法调用与方法执行的数据结构。封装了方法的局部变量表、动态链接信息、方法的返回地址以及操作数栈等信息。
+- 直接引用：就是直接指向了地址
+
+- 符号引用：通过将直接引用的赋值给符号，代码中可直接使用符号来代替直接引用。有些符号引用是在类加载阶段或事第一次使用时就会转换为直接引用，这种转换叫做静态解析；另外一些符号引用则是在每次运行期转换为直接引用，这种转换叫做动态链接，这体现为Java的多态性，如下面的伪代码：
+
+  ```java
+  Animal a = new Cat();
+  a.sleep();
+  a = new Dog();
+  a.sleep();
+  a = new Tiger();
+  a.sleep();
+  // 在程序的字节码中，我们能看到的都是调用的父类Animal的sleep()方法
+  // 通过invokevirtual，下节会讲
+  ```
+
+  ### 十、方法重载与invokevirtual字节码指令
+
+  我们先认识一下一些调用方法的指令：
+
+  1. invokeinterface：调用接口中的方法，实际上是在运行期决定的，决定到底调用实现改接口的哪个对象的特定方法。
+
+  2. invokestatic：调用静态方法。
+
+  3. invokespecial：调用自己的私有方法、构造方法以及父类的方法。
+
+  4. invokevirtual：调用虚方法，运行期动态查找的过程。
+
+  5. invokedynamic：动态调用方法。
+
+  ------
+
+  静态解析的4种情形：
+
+  1. 静态方法
+  2. 父类方法
+  3. 构造方法
+  4. 私有方法
+
+  以上4类方法称作非虚方法，他们是在类加载阶段就可以将符号引用转换为直接引用的。
+
