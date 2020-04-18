@@ -264,7 +264,7 @@ public class LongAndDoubleTest {
 
 ​		我们通过javap -verbose com.gapache.commons.jvm.bytecode.LongAndDoubleTest指令来看一下其常量池中的信息，可以看到虽然我们在代码中写了三次-6076574518398440533L 和三次10.1234567890D，但是常量池中，就只有一个常量-6076574518398440533L和一个常量10.1234567890D，如下所示：
 
-![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%8812.53.27.png)
+<img src="http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/byte_code/%E6%88%AA%E5%B1%8F2020-03-20%E4%B8%8B%E5%8D%8812.53.27.png"/>
 
 ​		常量池第#2个常量池项(cp_info) 就是CONSTANT_Long_info，值为-6076574518398440533L ；第#7个常量池项(cp_info) 就是CONSTANT_Double_info，值为10.1234567890D。
 
