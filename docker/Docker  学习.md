@@ -856,6 +856,30 @@ docker commit -m="提交的描述信息" -a="作者" 容器id 目标镜像名[:t
 
 如果数据都在容器中，那么我们容器删除，数据就会丢失！比如MySql，容器删了就等于删库了。
 
+容器的持久化和同步操作！容器间也是可以数据共享的！
+
+##### 使用数据卷
+
+> 方式一：直接使用命令来挂载 -v
+
+~~~shell
+docker run -it -v 主机目录:容器内目录
+
+# 测试
+[root@VM_0_10_centos ~]# docker run -it -v /home/dockerv:/home/dockerv centos /bin/bash
+# 测试文件的同步
+[root@979034c95228 /]# cd /home/
+[root@979034c95228 home]# ls
+dockerv
+[root@979034c95228 home]# cd dockerv/
+[root@979034c95228 dockerv]# ls
+[root@979034c95228 dockerv]# touch test.java		# 在容器路径下创建test.java
+[root@979034c95228 dockerv]# [root@VM_0_10_centos ~]# cd /home/dockerv/
+[root@VM_0_10_centos dockerv]# ls		# 查看宿主主机挂载的目录下已经同步
+test.java
+# 同样反向的操作也是生效的，是双向绑定的！
+~~~
+
 ### DockerFile
 
 ### Docker 网络
