@@ -603,3 +603,260 @@ root                23796               23125               0                   
 
 #### 进入当前正在运行的容器
 
+~~~shell
+# 我们通常容器都是使用后台方式运行的，需要进入容器，修改一些配置
+# 命令
+docker exec -it 容器id bashShell
+
+# 测试
+[root@VM_0_10_centos ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+7709c1bddc90        centos              "/bin/bash -c 'while…"   9 seconds ago       Up 7 seconds                            cool_lovelace
+[root@VM_0_10_centos ~]# docker exec -it 7709c1bddc90 /bin/bash
+[root@7709c1bddc90 /]# ls
+bin  dev  etc  home  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+
+# 方式二
+docker attach 容器id
+ 
+[root@VM_0_10_centos ~]# docker attach 7709c1bddc90
+ 正在执行当前的代码......
+ 
+# docker exec		进入容器后开启一个新的终端，可以在里面操作
+# docker attach 进入容器正在执行的终端，不会开启一个新的终端
+~~~
+
+#### 从容器中拷贝文件到主机上
+
+~~~shell
+docker cp 容器id:容器内路径 目的的主机路径
+
+# 测试
+[root@VM_0_10_centos home]# docker exec -it 242737cb3409 /bin/bash	# 进入容器
+[root@242737cb3409 /]# cd /home/	# 进入home目录
+[root@242737cb3409 home]# ls
+[root@242737cb3409 home]# touch test.java	# 创建一个文件
+[root@242737cb3409 home]# ls
+test.java
+[root@242737cb3409 home]# exit	# 退回到主机
+exit
+[root@VM_0_10_centos home]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+242737cb3409        centos              "/bin/bash"         2 minutes ago       Up 2 minutes                            mystifying_brattain
+[root@VM_0_10_centos home]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+242737cb3409        centos              "/bin/bash"         2 minutes ago       Up 2 minutes                            mystifying_brattain
+[root@VM_0_10_centos home]# docker cp 242737cb3409:/home/test.java /home	# 从容器拷贝文件到指定目录
+[root@VM_0_10_centos home]# ls
+dev  es  husen.java  mysftp  test.java  user	# 这里已经有了test.java
+~~~
+
+### 一堆的练习
+
+#### Docker 安装 Nginx
+
+~~~shell
+# 1、搜索镜像 search 建议去docker hub上搜索，可以看到帮助文档
+[root@VM_0_10_centos ~]# docker search nginx
+NAME                               DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED
+nginx                              Official build of Nginx.                        13403               [OK]                
+jwilder/nginx-proxy                Automated Nginx reverse proxy for docker con…   1829                                    [OK]
+richarvey/nginx-php-fpm            Container running Nginx + PHP-FPM capable of…   779                                     [OK]
+linuxserver/nginx                  An Nginx container, brought to you by LinuxS…   118                                     
+bitnami/nginx                      Bitnami nginx Docker Image                      86                                      [OK]
+tiangolo/nginx-rtmp                Docker image with Nginx using the nginx-rtmp…   81                                      [OK]
+alfg/nginx-rtmp                    NGINX, nginx-rtmp-module and FFmpeg from sou…   70                                      [OK]
+jc21/nginx-proxy-manager           Docker container for managing Nginx proxy ho…   67                                      
+nginxdemos/hello                   NGINX webserver that serves a simple page co…   55                                      [OK]
+jlesage/nginx-proxy-manager        Docker container for Nginx Proxy Manager        47                                      [OK]
+nginx/nginx-ingress                NGINX Ingress Controller for Kubernetes         36                                      
+privatebin/nginx-fpm-alpine        PrivateBin running on an Nginx, php-fpm & Al…   28                                      [OK]
+schmunk42/nginx-redirect           A very simple container to redirect HTTP tra…   18                                      [OK]
+nginxinc/nginx-unprivileged        Unprivileged NGINX Dockerfiles                  16                                      
+nginx/nginx-prometheus-exporter    NGINX Prometheus Exporter                       13                                      
+centos/nginx-112-centos7           Platform for running nginx 1.12 or building …   13                                      
+raulr/nginx-wordpress              Nginx front-end for the official wordpress:f…   13                                      [OK]
+centos/nginx-18-centos7            Platform for running nginx 1.8 or building n…   13                                      
+blacklabelops/nginx                Dockerized Nginx Reverse Proxy Server.          13                                      [OK]
+mailu/nginx                        Mailu nginx frontend                            7                                       [OK]
+sophos/nginx-vts-exporter          Simple server that scrapes Nginx vts stats a…   7                                       [OK]
+bitnami/nginx-ingress-controller   Bitnami Docker Image for NGINX Ingress Contr…   6                                       [OK]
+bitwarden/nginx                    The Bitwarden nginx web server acting as a r…   6                                       
+wodby/nginx                        Generic nginx                                   1                                       [OK]
+ansibleplaybookbundle/nginx-apb    An APB to deploy NGINX                          1                                       [OK]
+
+# 2、下载镜像 pull
+[root@VM_0_10_centos ~]# docker pull nginx
+Using default tag: latest
+latest: Pulling from library/nginx
+8559a31e96f4: Pull complete 
+8d69e59170f7: Pull complete 
+3f9f1ec1d262: Pull complete 
+d1f5ff4f210d: Pull complete 
+1e22bfa8652e: Pull complete 
+Digest: sha256:21f32f6c08406306d822a0e6e8b7dc81f53f336570e852e25fbe1e3e3d0d0133
+Status: Downloaded newer image for nginx:latest
+docker.io/library/nginx:latest
+[root@VM_0_10_centos ~]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+centos              latest              831691599b88        2 weeks ago         215MB
+tomcat              latest              2eb5a120304e        2 weeks ago         647MB
+nginx               latest              2622e6cca7eb        3 weeks ago         132MB
+registry            latest              33fbbf4a24e5        18 months ago       24.2MB
+busybox             latest              3a093384ac30        18 months ago       1.2MB
+centos              latest              1e1148e4cc2c        19 months ago       202MB
+training/webapp     latest              6fae60ef3446        5 years ago         349MB
+training/postgres   latest              6fa973bb3c26        6 years ago         365MB
+# 3、运行测试 -d后台运行 --name起名字 -p 容器端口映射到主机端口
+[root@VM_0_10_centos ~]# docker run -d --name nginx01 -p 3344:80 nginx
+ebee4311f5a0c1e455902a25423142b7c145fefc6e1f2d5d4c971ef98e013658
+[root@VM_0_10_centos ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
+ebee4311f5a0        nginx               "/docker-entrypoint.…"   6 seconds ago       Up 4 seconds        0.0.0.0:3344->80/tcp   nginx01
+[root@VM_0_10_centos ~]# curl 'http://localhost:3344'
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+~~~
+
+#### Docker  安装 Tomcat
+
+~~~shell
+# 官方的使用
+docker run -it --rm tomcat:9.0
+# 我们之前的启动都是后台，停止了容器之后，容器还是可以看到	docker run -it --rm tomcat:9.0，一般用来测试，用完就删除
+
+# 下载
+[root@VM_0_10_centos ~]# docker pull tomcat
+Using default tag: latest
+latest: Pulling from library/tomcat
+Digest: sha256:81c2a95e5b1b5867229d75255abe54928d505deb81c8ff8949b61fde1a5d30a1
+Status: Downloaded newer image for tomcat:latest
+docker.io/library/tomcat:latest
+# 启动运行
+[root@VM_0_10_centos ~]# docker run -d -p 3355:8080 --name tomcat01 tomcat
+81580192a2db9cf4a3b0628cb90369a3acb6e70b777e8a8da8144f1916e0d80d
+# 测试没问题
+~~~
+
+#### Docker 部署 es + kibana
+
+~~~shell
+# es 暴露的端口很多！
+# es 十分的耗内存
+# es 的数据一把需要放置到安全目录！挂载
+# --net somenetwork ？网络配置
+docker run -d --name elasticsearch --net somenetwork -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:tag
+
+# 启动
+[root@VM_0_10_centos ~]# docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:7.6.2
+Unable to find image 'elasticsearch:7.6.2' locally
+7.6.2: Pulling from library/elasticsearch
+ab5ef0e58194: Pull complete 
+c4d1ca5c8a25: Pull complete 
+941a3cc8e7b8: Pull complete 
+43ec483d9618: Pull complete 
+c486fd200684: Pull complete 
+1b960df074b2: Pull complete 
+1719d48d6823: Pull complete 
+Digest: sha256:1b09dbd93085a1e7bca34830e77d2981521a7210e11f11eda997add1c12711fa
+Status: Downloaded newer image for elasticsearch:7.6.2
+1e487d7ae5e8149f39d277e232d04265216e1c26be661a78c60a70df4cccb8bd
+
+# 启动了如果linux卡死住了 docker stats 查看cpu的状态
+# 修改配置文件 -e 环境配置修改
+[root@VM_0_10_centos bin]# docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e ES_JAVA_OPTS="-Xms64m -Xmx512m" elasticsearch:7.6.2
+192b61492fb79b2d751bafcd7d348a59382d36af6037ee7d3222c3801312919a
+[root@VM_0_10_centos bin]# docker ps
+CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                                            NAMES
+192b61492fb7        elasticsearch:7.6.2   "/usr/local/bin/dock…"   3 seconds ago       Up 2 seconds        0.0.0.0:9200->9200/tcp, 0.0.0.0:9300->9300/tcp   elasticsearch
+[root@VM_0_10_centos bin]# docker stats
+
+CONTAINER ID        NAME                CPU %               MEM USAGE / LIMIT     MEM %               NET I/O             BLOCK I/O           PIDS
+192b61492fb7        elasticsearch       0.00%               170.5MiB / 1.797GiB   9.27%               0B / 0B             0B / 0B             18
+# 测试
+[root@VM_0_10_centos bin]# curl 'localhost:9200'
+{
+  "name" : "192b61492fb7",
+  "cluster_name" : "docker-cluster",
+  "cluster_uuid" : "aZNiXOmTR9ak6u8Bu8Ogyg",
+  "version" : {
+    "number" : "7.6.2",
+    "build_flavor" : "default",
+    "build_type" : "docker",
+    "build_hash" : "ef48eb35cf30adf4db14086e8aabd07ef6fb113f",
+    "build_date" : "2020-03-26T06:34:37.794943Z",
+    "build_snapshot" : false,
+    "lucene_version" : "8.4.0",
+    "minimum_wire_compatibility_version" : "6.8.0",
+    "minimum_index_compatibility_version" : "6.0.0-beta1"
+  },
+  "tagline" : "You Know, for Search"
+}
+~~~
+
+### 可视化
+
+> Portainer
+>
+> ~~~shell
+> docker run -d -p 8088:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock --privileged=true portainer/portainer
+> ~~~
+>
+> Rancher（CI/CD 再用）
+
+#### Portainer?
+
+Docker图形化界面管理工具，提供一个后台面板供我们操作。
+
+~~~shell
+docker run -d -p 8088:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock --privileged=true portainer/portainer
+~~~
+
+访问外网8088就可以了。
+
+### Docker镜像讲解
+
+#### 镜像是什么
+
+#### Docker镜像加载原理
+
+#### 分层理解
+
+#### commit镜像
+
+~~~ shell
+docker commit 提交容器成为一个新的镜像
+docker commit -m="提交的描述信息" -a="作者" 容器id 目标镜像名[:tag]
+~~~
+
+### 容器数据卷
+
+如果数据都在容器中，那么我们容器删除，数据就会丢失！比如MySql，容器删了就等于删库了。
+
+### DockerFile
+
+### Docker 网络
+
