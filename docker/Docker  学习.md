@@ -827,7 +827,7 @@ CONTAINER ID        NAME                CPU %               MEM USAGE / LIMIT   
 >
 > Rancher（CI/CD 再用）
 
-#### Portainer?
+#### Portainer ？
 
 Docker图形化界面管理工具，提供一个后台面板供我们操作。
 
@@ -858,7 +858,7 @@ docker commit -m="提交的描述信息" -a="作者" 容器id 目标镜像名[:t
 
 容器的持久化和同步操作！容器间也是可以数据共享的！
 
-##### 使用数据卷
+#### 使用数据卷
 
 > 方式一：直接使用命令来挂载 -v
 
@@ -880,7 +880,662 @@ test.java
 # 同样反向的操作也是生效的，是双向绑定的！
 ~~~
 
+#### 安装MySQL
+
+~~~shell
+# 获取镜像
+[root@VM_0_10_centos ~]# docker pull mysql:5.7
+5.7: Pulling from library/mysql
+8559a31e96f4: Already exists 
+d51ce1c2e575: Pull complete 
+c2344adc4858: Pull complete 
+fcf3ceff18fc: Pull complete 
+16da0c38dc5b: Pull complete 
+b905d1797e97: Pull complete 
+4b50d1c6b05c: Pull complete 
+d85174a87144: Pull complete 
+a4ad33703fa8: Pull complete 
+f7a5433ce20d: Pull complete 
+3dcd2a278b4a: Pull complete 
+Digest: sha256:32f9d9a069f7a735e28fd44ea944d53c61f990ba71460c5c183e610854ca4854
+Status: Downloaded newer image for mysql:5.7
+docker.io/library/mysql:5.7
+# 运行容器，需要做数据挂载
+[root@VM_0_10_centos ~]# docker run -d -p 3310:3306 -v /home/mysql/conf:/etc/mysql/conf.d -v /home/mysql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456 --name mysql01 mysql:5.7
+1881ae2a6ce8f65a4c75c72991d5d645b0f064b4118a7a10b3a1c8733d3869d3
+[root@VM_0_10_centos ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                               NAMES
+1881ae2a6ce8        mysql:5.7           "docker-entrypoint.s…"   4 seconds ago       Up 2 seconds        33060/tcp, 0.0.0.0:3310->3306/tcp   mysql01
+# 然后就可以用工具进行连接测试
+~~~
+
+#### 具名和匿名挂载
+
+~~~shell
+# 匿名挂载
+-v 容器内路径！
+docker run -d -P --name nginx01 -v /etc/nginx nginx
+
+# 查看所有的卷的情况
+[root@VM_0_10_centos mysql]# docker volume list
+DRIVER              VOLUME NAME
+local               3fc2a56d351d24953347182c7fef3af9ae636c1ff83d18f0de0c29935e657877
+local               879d7acacb6dd647c4ce44d092a48b1abba47fddfed44a00edaaa6e9c5a33bd0
+local               7377f3e168c18e0bbb895ed4bcb8ba1d424abeb9e4c8a664f401b81db333176f
+local               0573798a94de135d101d50029f95826e6309df31c2dc31098dcf5a570445867c
+local               ac5fbdbfe263d1178b8c813aaa1f0a5bcf71037e0add427ef9dd5e611fa37409
+local               d2bcd0097490d06ea7511d08ebf9b0492f682a3788e61727d655377aceff2f44
+local               ea557af2d444bb65294c2cb67482fe3d161f117c37731536e1e2ce771900fd7e
+local               fa7a8ab48c44e3648651f646a91c9e77006da7ba5256e80b7d9b6d4de3dbc605
+# 上面这些没有起名字的都是匿名挂载，我在 -v 的时候只写了容器内的路径，没有写容器外的路径！
+
+# 具名挂载
+docker run -d -P --name nginx02 -v juming-nginx:/etc/nginx nginx
+
+# 查看所有的卷的情况
+[root@VM_0_10_centos mysql]# docker volume ls
+DRIVER              VOLUME NAME
+local               3fc2a56d351d24953347182c7fef3af9ae636c1ff83d18f0de0c29935e657877
+local               879d7acacb6dd647c4ce44d092a48b1abba47fddfed44a00edaaa6e9c5a33bd0
+local               7377f3e168c18e0bbb895ed4bcb8ba1d424abeb9e4c8a664f401b81db333176f
+local               0573798a94de135d101d50029f95826e6309df31c2dc31098dcf5a570445867c
+local               ac5fbdbfe263d1178b8c813aaa1f0a5bcf71037e0add427ef9dd5e611fa37409
+local               d2bcd0097490d06ea7511d08ebf9b0492f682a3788e61727d655377aceff2f44
+local               ea557af2d444bb65294c2cb67482fe3d161f117c37731536e1e2ce771900fd7e
+local               fa7a8ab48c44e3648651f646a91c9e77006da7ba5256e80b7d9b6d4de3dbc605
+local               juming-nginx
+# 上面juming-nginx就是具名挂载
+
+# 查看挂载的信息
+[root@VM_0_10_centos mysql]# docker inspect juming-nginx
+[
+    {
+        "CreatedAt": "2020-07-02T10:03:30+08:00",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/juming-nginx/_data",
+        "Name": "juming-nginx",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+# 进入挂载的目录
+[root@VM_0_10_centos mysql]# cd /var/lib/docker/
+[root@VM_0_10_centos docker]# cd volumes/
+# 所有的挂载
+[root@VM_0_10_centos volumes]# ll
+drwxr-xr-x 3 root root  4096 1月  17 2019 0573798a94de135d101d50029f95826e6309df31c2dc31098dcf5a570445867c
+drwxr-xr-x 3 root root  4096 7月   1 15:45 3fc2a56d351d24953347182c7fef3af9ae636c1ff83d18f0de0c29935e657877
+drwxr-xr-x 3 root root  4096 1月  17 2019 7377f3e168c18e0bbb895ed4bcb8ba1d424abeb9e4c8a664f401b81db333176f
+drwxr-xr-x 3 root root  4096 7月   2 09:58 879d7acacb6dd647c4ce44d092a48b1abba47fddfed44a00edaaa6e9c5a33bd0
+drwxr-xr-x 3 root root  4096 1月  16 2019 ac5fbdbfe263d1178b8c813aaa1f0a5bcf71037e0add427ef9dd5e611fa37409
+drwxr-xr-x 3 root root  4096 1月  16 2019 d2bcd0097490d06ea7511d08ebf9b0492f682a3788e61727d655377aceff2f44
+drwxr-xr-x 3 root root  4096 1月  16 2019 ea557af2d444bb65294c2cb67482fe3d161f117c37731536e1e2ce771900fd7e
+drwxr-xr-x 3 root root  4096 1月  16 2019 fa7a8ab48c44e3648651f646a91c9e77006da7ba5256e80b7d9b6d4de3dbc605
+drwxr-xr-x 3 root root  4096 7月   2 10:03 juming-nginx
+-rw------- 1 root root 65536 7月   2 10:03 metadata.db
+[root@VM_0_10_centos volumes]# cd juming-nginx/
+[root@VM_0_10_centos juming-nginx]# ll
+总用量 4
+drwxr-xr-x 3 root root 4096 7月   2 10:03 _data
+[root@VM_0_10_centos juming-nginx]# cd _data/
+
+# 看到挂载的nginx的路径都在这里
+[root@VM_0_10_centos _data]# ll
+总用量 40
+drwxr-xr-x 2 root root 4096 7月   2 10:03 conf.d
+-rw-r--r-- 1 root root 1007 5月  26 23:00 fastcgi_params
+-rw-r--r-- 1 root root 2837 5月  26 23:00 koi-utf
+-rw-r--r-- 1 root root 2223 5月  26 23:00 koi-win
+-rw-r--r-- 1 root root 5231 5月  26 23:00 mime.types
+lrwxrwxrwx 1 root root   22 5月  26 23:01 modules -> /usr/lib/nginx/modules
+-rw-r--r-- 1 root root  643 5月  26 23:01 nginx.conf
+-rw-r--r-- 1 root root  636 5月  26 23:00 scgi_params
+-rw-r--r-- 1 root root  664 5月  26 23:00 uwsgi_params
+-rw-r--r-- 1 root root 3610 5月  26 23:00 win-utf
+~~~
+
+我们通过具名挂载可以方便的找到我们的一个卷，大多数情况下使用具名挂载。
+
+~~~shell
+# -v 容器内路径:ro,rw 改变读写权限
+ro		readonly	# 只读
+rw		readwrite	# 可读可写
+# 一旦设置容器权限，容器对我们挂载出来的内容就有限定了！
+docker run -d -P --name nginx02 -v juming-nginx:/etc/nginx:rw nginx
+docker run -d -P --name nginx02 -v juming-nginx:/etc/nginx:ro nginx
+
+# ro 只要看到ro就说明这个路径只能通过宿主机来操作，容器内是无法操作的。
+~~~
+
+#### 数据卷容器
+
+多个mysql同步数据！
+
+~~~shell
+# 启动3个容器，通过我们刚才自己写的镜像
+
+# 启动docker01
+[root@VM_0_10_centos docker-test-volume]# docker run -it --name docker01 husen/centos:1.0 /bin/bash
+
+# 启动docker02
+[root@2b98b24dfe2c /]# [root@VM_0_10_centos docker-test-volume]# docker run -it --name docker02 --volumes-from docker01 husen/centos:1.0
+[root@0a6360dd1a07 /]# ls
+bin  dev  etc  home  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var  `volume01`	`volume02`
+
+# 进入docker01的数据卷创建一个docker01文件
+[root@VM_0_10_centos docker-test-volume]# docker exec -it docker01 /bin/bash
+[root@2b98b24dfe2c /]# cd volume01/
+[root@2b98b24dfe2c volume01]# touch docker01
+[root@2b98b24dfe2c volume01]# read escape sequence
+
+# 进入docker02查看数据卷的内容已经同步了docker01的文件
+[root@VM_0_10_centos docker-test-volume]# docker exec -it docker02 /bin/bash
+[root@0a6360dd1a07 /]# ls
+bin  dev  etc  home  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var  `volume01`	`volume02`
+[root@0a6360dd1a07 /]# cd volume01/
+[root@0a6360dd1a07 volume01]# ls
+`docker01`
+[root@0a6360dd1a07 volume01]# lsread escape sequence
+
+# 创建docker03
+[root@VM_0_10_centos docker-test-volume]# docker run -it --name docker03 --volumes-from docker01 husen/centos:1.0
+
+# 查看数据卷内容已经同步docker01的内容
+[root@9a6e3bcae26d /]# ls
+bin  dev  etc  home  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var  `volume01`	`volume02`
+[root@9a6e3bcae26d /]# cd volume01/
+[root@9a6e3bcae26d volume01]# ls
+`docker01`
+
+# 在docker03创建docker03文件
+[root@9a6e3bcae26d volume01]# touch docker03
+[root@9a6e3bcae26d volume01]# ls
+`docker01`  `docker03`
+
+# 进入docker01数据卷docker03也同步过来了
+[root@9a6e3bcae26d volume01]# [root@VM_0_1docker exec -it docker01 /bin/bash
+[root@2b98b24dfe2c /]# cd volume01/
+[root@2b98b24dfe2c volume01]# ls
+`docker01`  `docker03`
+
+# 删除docker01，数据卷也是存在的
+[root@VM_0_10_centos docker-test-volume]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+9a6e3bcae26d        husen/centos:1.0    "/bin/sh -c /bin/bash"   5 minutes ago       Up 5 minutes                            docker03
+0a6360dd1a07        husen/centos:1.0    "/bin/sh -c /bin/bash"   9 minutes ago       Up 9 minutes                            docker02
+2b98b24dfe2c        husen/centos:1.0    "/bin/bash"              11 minutes ago      Up 11 minutes                           docker01
+[root@VM_0_10_centos docker-test-volume]# docker rm -f 2b98b24dfe2c
+2b98b24dfe2c
+[root@VM_0_10_centos docker-test-volume]# docker exec -it docker02 /bin/bash
+[root@0a6360dd1a07 /]# ls
+bin  dev  etc  home  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var  `volume01`	`volume02`
+~~~
+
+容器之间配置信息的传递，数据卷容器的生命周期一直持续到没有容器使用为止。 但是一旦你持续化到了本地，这个时候，本地的数据不会删除！
+
 ### DockerFile
+
+#### 初始DockerFile
+
+> DockerFile 就是用来构建docker镜像的构建文件！命令脚本！ 
+>
+> 构建步骤：
+>
+> 1. 编写一个dockerfile文件
+> 2. docker build构建成为一个镜像
+> 3. docker run运行镜像
+> 4. docker push发布镜像（DockerHub、阿里云镜像仓库）
+
+~~~shell
+# 查看我们编写的dockerfile的内容
+[root@VM_0_10_centos docker-test-volume]# cat dockerfile 
+FROM centos
+
+VOLUME ["volume01", "volume02"]
+
+CMD echo "------end------"
+
+CMD /bin/bash
+# 这里的每个命令都是镜像的一层
+
+# 通过dockerfile进行构建
+[root@VM_0_10_centos docker-test-volume]# docker build -f dockerfile -t husen/centos:1.0 .
+Sending build context to Docker daemon  2.048kB
+Step 1/4 : FROM centos
+ ---> 831691599b88
+Step 2/4 : VOLUME ["volume01", "volume02"]
+ ---> Running in eed46ba8a8c6
+Removing intermediate container eed46ba8a8c6
+ ---> 2499b2f9ae4a
+Step 3/4 : CMD echo "------end------"
+ ---> Running in 0c7bbf8c514c
+Removing intermediate container 0c7bbf8c514c
+ ---> 4ae9c33afe73
+Step 4/4 : CMD /bin/bash
+ ---> Running in 876d0897b3bd
+Removing intermediate container 876d0897b3bd
+ ---> 96cf2f19e4b
+Successfully built 96cf2f19e4b4
+Successfully tagged husen/centos:1.0
+
+# 查看生成的镜像
+[root@VM_0_10_centos docker-test-volume]# docker images
+REPOSITORY            TAG                 IMAGE ID            CREATED             SIZE
+husen/centos          1.0                 96cf2f19e4b4        16 seconds ago      215MB
+
+# 启动自己写的容器
+[root@VM_0_10_centos docker-test-volume]# docker run -it husen/centos:1.0 /bin/bash
+[root@60bc89e074b4 /]# ls
+bin  dev  etc  home  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var  `volume01`	`volume02`
+# volume01和volume02卷和外部一定有一个同步的目录
+[root@VM_0_10_centos docker-test-volume]# docker inspect 60bc89e074b4
+"Mounts": [
+            {
+                "Type": "volume",
+                "Name": "9a7f3daa1a7f02cc5ae2c3ca122566b05ecb677a0a15bee1a841de3e8537335b",
+                "Source": "/var/lib/docker/volumes/9a7f3daa1a7f02cc5ae2c3ca122566b05ecb677a0a15bee1a841de3e8537335b/_data",
+                "Destination": "volume01",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "9515c92675a736c9d33ea0e94dbb3242ca7dd8449407df980def399c5ed312d7",
+                "Source": "/var/lib/docker/volumes/9515c92675a736c9d33ea0e94dbb3242ca7dd8449407df980def399c5ed312d7/_data",
+                "Destination": "volume02",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            }
+        ]
+~~~
+
+这种方式我们未来使用的十分多，因为我们通常会构建自己的镜像！
+
+假设构建镜像的时候没有挂载卷，要手动镜像挂载 -v。
+
+#### DockerFile构建步骤
+
+##### 基础知识
+
+1. 每个保留关键字（指令）都是必须是大写字母
+2. 执行从上到下执行
+3. #表示注释
+4. 每一个指令都会创建提交一个新的镜像层并提交
+
+dockerfile是面向开发的，我们以后要发布项目，做镜像，就需要编写dockerfile文件，这个文件十分简单！Docker逐渐成为了企业交付的标准，必须要掌握！
+
+##### DockerFile的指令
+
+~~~shell
+FROM				# 基础镜像，一切从这里开始构建
+MAINTAINER	# 镜像是谁写的，姓名 + 邮箱
+RUN					# 镜像构建的时候需要运行的命令
+ADD					# 步骤，tomcat镜像，这个tomcat压缩包！添加内容
+WORKDIR			# 镜像的工作目录
+VOLUME			# 挂载的目录
+EXPOSE			# 指定暴露端口
+CMD					# 指定这个容器启动的时候要运行的命令，只有最后一个会生效，可被替代
+ENTRYPOINT	# 指定这个容器启动的时候要运行的命令，可以追加命令
+ONBUILD			# 当构建一个被继承 DockerFile 这个时候就会运行ONBUILD的指令，触发指令。
+COPY				# 类似ADD，将我们文件拷贝到镜像中
+ENV					# 构建的时候设置环境变量
+~~~
+
+##### 实战测试
+
+```shell
+# 编写dockerfile文件
+[root@VM_0_10_centos docker]# cat mydockerfile-centos 
+FROM centos
+MAINTAINER husen<1178515826@qq.com>
+ENV MYPATH /usr/local
+WORKDIR $MYPATH
+
+RUN yum -y install vim
+RUN yum -y install net-tools
+
+EXPOSE 80
+
+CMD echo $MYPATH
+CMD echo "------end------"
+CMD /bin/bash
+# 通过文件构建对象
+[root@VM_0_10_centos docker]# docker build -f mydockerfile-centos -t mycentos:0.1 .
+Sending build context to Docker daemon  2.048kB
+Step 1/10 : FROM centos
+ ---> 831691599b88
+Step 2/10 : MAINTAINER husen<1178515826@qq.com>
+ ---> Running in ece6d9a55bc4
+Removing intermediate container ece6d9a55bc4
+ ---> 742cbb30b28b
+Step 3/10 : ENV MYPATH /usr/local
+ ---> Running in ce6a9e02b2bf
+Removing intermediate container ce6a9e02b2bf
+ ---> b35cf6c24dd4
+Step 4/10 : WORKDIR $MYPATH
+ ---> Running in f2490c08569b
+Removing intermediate container f2490c08569b
+ ---> 4010611bd507
+Step 5/10 : RUN yum -y install vim
+ ---> Running in 362505cfc1c8
+CentOS-8 - AppStream                            258 kB/s | 5.8 MB     00:22    
+CentOS-8 - Base                                 1.4 MB/s | 2.2 MB     00:01    
+CentOS-8 - Extras                               6.9 kB/s | 6.7 kB     00:00    
+Dependencies resolved.
+================================================================================
+ Package             Arch        Version                   Repository      Size
+================================================================================
+Installing:
+ vim-enhanced        x86_64      2:8.0.1763-13.el8         AppStream      1.4 M
+Installing dependencies:
+ gpm-libs            x86_64      1.20.7-15.el8             AppStream       39 k
+ vim-common          x86_64      2:8.0.1763-13.el8         AppStream      6.3 M
+ vim-filesystem      noarch      2:8.0.1763-13.el8         AppStream       48 k
+ which               x86_64      2.21-12.el8               BaseOS          49 k
+
+Transaction Summary
+================================================================================
+Install  5 Packages
+
+Total download size: 7.8 M
+Installed size: 31 M
+Downloading Packages:
+(1/5): gpm-libs-1.20.7-15.el8.x86_64.rpm         94 kB/s |  39 kB     00:00    
+(2/5): vim-filesystem-8.0.1763-13.el8.noarch.rp 119 kB/s |  48 kB     00:00    
+(3/5): which-2.21-12.el8.x86_64.rpm             219 kB/s |  49 kB     00:00    
+(4/5): vim-enhanced-8.0.1763-13.el8.x86_64.rpm  724 kB/s | 1.4 MB     00:01    
+(5/5): vim-common-8.0.1763-13.el8.x86_64.rpm    1.0 MB/s | 6.3 MB     00:06    
+--------------------------------------------------------------------------------
+Total                                           1.0 MB/s | 7.8 MB     00:07     
+warning: /var/cache/dnf/AppStream-02e86d1c976ab532/packages/gpm-libs-1.20.7-15.el8.x86_64.rpm: Header V3 RSA/SHA256 Signature, key ID 8483c65d: NOKEY
+CentOS-8 - AppStream                            1.5 MB/s | 1.6 kB     00:00    
+Importing GPG key 0x8483C65D:
+ Userid     : "CentOS (CentOS Official Signing Key) <security@centos.org>"
+ Fingerprint: 99DB 70FA E1D7 CE22 7FB6 4882 05B5 55B3 8483 C65D
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+Key imported successfully
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Installing       : which-2.21-12.el8.x86_64                               1/5 
+  Installing       : vim-filesystem-2:8.0.1763-13.el8.noarch                2/5 
+  Installing       : vim-common-2:8.0.1763-13.el8.x86_64                    3/5 
+  Installing       : gpm-libs-1.20.7-15.el8.x86_64                          4/5 
+  Running scriptlet: gpm-libs-1.20.7-15.el8.x86_64                          4/5 
+  Installing       : vim-enhanced-2:8.0.1763-13.el8.x86_64                  5/5 
+  Running scriptlet: vim-enhanced-2:8.0.1763-13.el8.x86_64                  5/5 
+  Running scriptlet: vim-common-2:8.0.1763-13.el8.x86_64                    5/5 
+  Verifying        : gpm-libs-1.20.7-15.el8.x86_64                          1/5 
+  Verifying        : vim-common-2:8.0.1763-13.el8.x86_64                    2/5 
+  Verifying        : vim-enhanced-2:8.0.1763-13.el8.x86_64                  3/5 
+  Verifying        : vim-filesystem-2:8.0.1763-13.el8.noarch                4/5 
+  Verifying        : which-2.21-12.el8.x86_64                               5/5 
+
+Installed:
+  gpm-libs-1.20.7-15.el8.x86_64         vim-common-2:8.0.1763-13.el8.x86_64    
+  vim-enhanced-2:8.0.1763-13.el8.x86_64 vim-filesystem-2:8.0.1763-13.el8.noarch
+  which-2.21-12.el8.x86_64             
+
+Complete!
+Removing intermediate container 362505cfc1c8
+ ---> e4aa3f246434
+Step 6/10 : RUN yum -y install net-tools
+ ---> Running in 7caf7f02dfc8
+Last metadata expiration check: 0:00:18 ago on Thu Jul  2 08:51:38 2020.
+Dependencies resolved.
+================================================================================
+ Package         Architecture Version                        Repository    Size
+================================================================================
+Installing:
+ net-tools       x86_64       2.0-0.51.20160912git.el8       BaseOS       323 k
+
+Transaction Summary
+================================================================================
+Install  1 Package
+
+Total download size: 323 k
+Installed size: 1.0 M
+Downloading Packages:
+net-tools-2.0-0.51.20160912git.el8.x86_64.rpm   772 kB/s | 323 kB     00:00    
+--------------------------------------------------------------------------------
+Total                                           333 kB/s | 323 kB     00:00     
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Installing       : net-tools-2.0-0.51.20160912git.el8.x86_64              1/1 
+  Running scriptlet: net-tools-2.0-0.51.20160912git.el8.x86_64              1/1 
+  Verifying        : net-tools-2.0-0.51.20160912git.el8.x86_64              1/1 
+
+Installed:
+  net-tools-2.0-0.51.20160912git.el8.x86_64                                     
+
+Complete!
+Removing intermediate container 7caf7f02dfc8
+ ---> 01d5e238c103
+Step 7/10 : EXPOSE 80
+ ---> Running in 108acb6a42c4
+Removing intermediate container 108acb6a42c4
+ ---> a392c8288a85
+Step 8/10 : CMD echo $MYPATH
+ ---> Running in 986c2c608c3b
+Removing intermediate container 986c2c608c3b
+ ---> 875084edd452
+Step 9/10 : CMD echo "------end------"
+ ---> Running in 626c7940ef62
+Removing intermediate container 626c7940ef62
+ ---> 0b8ec769ca08
+Step 10/10 : CMD /bin/bash
+ ---> Running in 740b85ccb493
+Removing intermediate container 740b85ccb493
+ ---> 987ecc86638b
+Successfully built 987ecc86638b
+Successfully tagged mycentos:0.1
+[root@VM_0_10_centos docker]# docker images
+REPOSITORY            TAG                 IMAGE ID            CREATED              SIZE
+mycentos              0.1                 987ecc86638b        About a minute ago   287MB
+husen/centos          1.0                 96cf2f19e4b4        6 hours ago          215MB
+centos                latest              831691599b88        2 weeks ago          215MB
+tomcat                9.0                 2eb5a120304e        3 weeks ago          647MB
+tomcat                latest              2eb5a120304e        3 weeks ago          647MB
+tomcat                latest              2eb5a120304e        3 weeks ago          647MB
+nginx                 latest              2622e6cca7eb        3 weeks ago          132MB
+mysql                 5.7                 9cfcce23593a        3 weeks ago          448MB
+portainer/portainer   latest              cd645f5a4769        4 weeks ago          79.1MB
+elasticsearch         7.6.2               f29a1ee41030        3 months ago         791MB
+registry              latest              33fbbf4a24e5        18 months ago        24.2MB
+busybox               latest              3a093384ac30        18 months ago        1.2MB
+centos                latest              1e1148e4cc2c        19 months ago        202MB
+training/webapp       latest              6fae60ef3446        5 years ago          349MB
+training/postgres     latest              6fa973bb3c26        6 years ago          365MB
+# 运行构建的镜像
+[root@VM_0_10_centos docker]# docker run -it mycentos:0.1
+[root@c8d767a91801 local]# pwd
+`/usr/local`
+# 发现进入进去就是设置的工作目录，vim和ifconfig也都支持了
+[root@c8d767a91801 local]# ifconfig
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.17.0.2  netmask 255.255.0.0  broadcast 172.17.255.255
+        ether 02:42:ac:11:00:02  txqueuelen 0  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        loop  txqueuelen 1  (Local Loopback)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+[root@c8d767a91801 local]# vim
+# 我们可以列出本地进行的变更历史
+[root@VM_0_10_centos docker]# docker history 987ecc86638b
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+987ecc86638b        5 minutes ago       /bin/sh -c #(nop)  CMD ["/bin/sh" "-c" "/bin…   0B                  
+0b8ec769ca08        5 minutes ago       /bin/sh -c #(nop)  CMD ["/bin/sh" "-c" "echo…   0B                  
+875084edd452        5 minutes ago       /bin/sh -c #(nop)  CMD ["/bin/sh" "-c" "echo…   0B                  
+a392c8288a85        5 minutes ago       /bin/sh -c #(nop)  EXPOSE 80                    0B                  
+01d5e238c103        5 minutes ago       /bin/sh -c yum -y install net-tools             14.3MB              
+e4aa3f246434        5 minutes ago       /bin/sh -c yum -y install vim                   57.1MB              
+4010611bd507        6 minutes ago       /bin/sh -c #(nop) WORKDIR /usr/local            0B                  
+b35cf6c24dd4        6 minutes ago       /bin/sh -c #(nop)  ENV MYPATH=/usr/local        0B                  
+742cbb30b28b        6 minutes ago       /bin/sh -c #(nop)  MAINTAINER husen<11785158…   0B                  
+831691599b88        2 weeks ago         /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B                  
+<missing>           2 weeks ago         /bin/sh -c #(nop)  LABEL org.label-schema.sc…   0B                  
+<missing>           2 weeks ago         /bin/sh -c #(nop) ADD file:84700c11fcc969ac0…   215MB   
+# 我们平时拿到一个镜像可以研究一下它是怎么做的了
+```
+
+##### CMD、ENTRYPOINT
+
+CMD
+
+```shell
+[root@VM_0_10_centos docker]# cat dockerfile-cmd-test 
+FROM centos
+CMD ["ls", "-a"]
+[root@VM_0_10_centos docker]# docker build -f dockerfile-cmd-test -t cmdtest .
+Sending build context to Docker daemon  3.072kB
+Step 1/2 : FROM centos
+ ---> 831691599b88
+Step 2/2 : CMD ["ls", "-a"]
+ ---> Running in f23189f02423
+Removing intermediate container f23189f02423
+ ---> e4af0f7d9991
+Successfully built e4af0f7d9991
+Successfully tagged cmdtest:latest
+[root@VM_0_10_centos docker]# docker run e4af0f7d9991
+.
+..
+.dockerenv
+bin
+dev
+etc
+home
+lib
+lib64
+lost+found
+media
+mnt
+opt
+proc
+root
+run
+sbin
+srv
+sys
+tmp
+usr
+var
+
+# CMD的情况下 -l 替换了CMD ["ls", "-a"] 命令，-l不是命令所以报错！
+[root@VM_0_10_centos docker]# docker run e4af0f7d9991 -l
+docker: Error response from daemon: OCI runtime create failed: container_linux.go:349: starting container process caused "exec: \"-l\": executable file not found in $PATH": unknown.
+[root@VM_0_10_centos docker]# docker run e4af0f7d9991  ls -al
+total 56
+drwxr-xr-x  1 root root 4096 Jul  2 09:07 .
+drwxr-xr-x  1 root root 4096 Jul  2 09:07 ..
+-rwxr-xr-x  1 root root    0 Jul  2 09:07 .dockerenv
+lrwxrwxrwx  1 root root    7 May 11  2019 bin -> usr/bin
+drwxr-xr-x  5 root root  340 Jul  2 09:07 dev
+drwxr-xr-x  1 root root 4096 Jul  2 09:07 etc
+drwxr-xr-x  2 root root 4096 May 11  2019 home
+lrwxrwxrwx  1 root root    7 May 11  2019 lib -> usr/lib
+lrwxrwxrwx  1 root root    9 May 11  2019 lib64 -> usr/lib64
+drwx------  2 root root 4096 Jun 11 02:35 lost+found
+drwxr-xr-x  2 root root 4096 May 11  2019 media
+drwxr-xr-x  2 root root 4096 May 11  2019 mnt
+drwxr-xr-x  2 root root 4096 May 11  2019 opt
+dr-xr-xr-x 99 root root    0 Jul  2 09:07 proc
+dr-xr-x---  2 root root 4096 Jun 11 02:35 root
+drwxr-xr-x 11 root root 4096 Jun 11 02:35 run
+lrwxrwxrwx  1 root root    8 May 11  2019 sbin -> usr/sbin
+drwxr-xr-x  2 root root 4096 May 11  2019 srv
+dr-xr-xr-x 13 root root    0 Jul  2 09:07 sys
+drwxrwxrwt  7 root root 4096 Jun 11 02:35 tmp
+drwxr-xr-x 12 root root 4096 Jun 11 02:35 usr
+drwxr-xr-x 20 root root 4096 Jun 11 02:35 var
+```
+
+ENTRYPOINT
+
+~~~shell
+[root@VM_0_10_centos docker]# cat dockerfile-entrypoint 
+FROM centos
+ENTRYPOINT ["ls", "-a"]
+[root@VM_0_10_centos docker]# docker build -f dockerfile-entrypoint -t entrypoint .
+Sending build context to Docker daemon  4.096kB
+Step 1/2 : FROM centos
+ ---> 831691599b88
+Step 2/2 : ENTRYPOINT ["ls", "-a"]
+ ---> Running in db59219c0285
+Removing intermediate container db59219c0285
+ ---> ffa62bc7555c
+Successfully built ffa62bc7555c
+Successfully tagged entrypoint:latest
+[root@VM_0_10_centos docker]# docker run ffa62bc7555c
+.
+..
+.dockerenv
+bin
+dev
+etc
+home
+lib
+lib64
+lost+found
+media
+mnt
+opt
+proc
+root
+run
+sbin
+srv
+sys
+tmp
+usr
+var
+
+# 我们追加命令是直接拼接在我们的ENTRYPOINT命令的后面
+[root@VM_0_10_centos docker]# docker run ffa62bc7555c -l
+total 56
+drwxr-xr-x   1 root root 4096 Jul  2 09:10 .
+drwxr-xr-x   1 root root 4096 Jul  2 09:10 ..
+-rwxr-xr-x   1 root root    0 Jul  2 09:10 .dockerenv
+lrwxrwxrwx   1 root root    7 May 11  2019 bin -> usr/bin
+drwxr-xr-x   5 root root  340 Jul  2 09:10 dev
+drwxr-xr-x   1 root root 4096 Jul  2 09:10 etc
+drwxr-xr-x   2 root root 4096 May 11  2019 home
+lrwxrwxrwx   1 root root    7 May 11  2019 lib -> usr/lib
+lrwxrwxrwx   1 root root    9 May 11  2019 lib64 -> usr/lib64
+drwx------   2 root root 4096 Jun 11 02:35 lost+found
+drwxr-xr-x   2 root root 4096 May 11  2019 media
+drwxr-xr-x   2 root root 4096 May 11  2019 mnt
+drwxr-xr-x   2 root root 4096 May 11  2019 opt
+dr-xr-xr-x 102 root root    0 Jul  2 09:10 proc
+dr-xr-x---   2 root root 4096 Jun 11 02:35 root
+drwxr-xr-x  11 root root 4096 Jun 11 02:35 run
+lrwxrwxrwx   1 root root    8 May 11  2019 sbin -> usr/sbin
+drwxr-xr-x   2 root root 4096 May 11  2019 srv
+dr-xr-xr-x  13 root root    0 Jul  2 09:10 sys
+drwxrwxrwt   7 root root 4096 Jun 11 02:35 tmp
+drwxr-xr-x  12 root root 4096 Jun 11 02:35 usr
+drwxr-xr-x  20 root root 4096 Jun 11 02:35 var
+~~~
 
 ### Docker 网络
 
