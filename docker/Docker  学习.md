@@ -1,28 +1,41 @@
-> Docker  学习
+> Docker  学习Docker  学习Docker  学习Docker  学习Docker  学习Docker  学习Docker  学习Docker  学习Docker  学习Docker  学习
+> sssssssssss
+>
+> Sssssssssss
 
 - Docker概述
+
 - Docker安装
+
 - Docker命令
   - 镜像命令
   - 容器命令
   - 操作命令
   - ...
+  
 - Docker镜像
+
 - 容器数据卷
+
 - DockerFile
+
 - Docker网络原理
+
 - Idea整合Docker
+
 - Docker Compose
+
 - Docker Swarm
+
 - CI\CD Jenkins
+
+  [TOC]
 
 ### Docker概述
 
 #### Docker为什么会出现？
 
 ### Docker的历史
-
-
 
 > DevOps（开发，运维）
 >
@@ -64,7 +77,7 @@ registry            latest              33fbbf4a24e5        18 months ago       
 busybox             latest              3a093384ac30        18 months ago       1.2MB
 centos              latest              1e1148e4cc2c        19 months ago       202MB
 centos              latest              1e1148e4cc2c        19 months ago       202MB
-training/webapp     latest              6fae60ef3446        5 years ago         349MB
+training/webapp     latest              6fae60ef3446        5 years ago         349MB         
 training/postgres   latest              6fa973bb3c26        6 years ago         365MB
 
 # 解释
@@ -376,7 +389,6 @@ ae29b8b34989        centos              "/bin/bash -c 'while…"   4 seconds ago
 
 -tf						# 显示日志
 -tail number	# 要显示的日志条数
-
 ~~~
 
 #### 查看容器中的进程信息
@@ -2013,3 +2025,42 @@ e91ca6338ee8eb2beb2bcb718c09660c733ac99d 172.38.0.11:6379@16379 myself,master - 
 ### Docker Swarm
 
 ### CI/CD之Jenkins
+
+- sss
+  - 
+
+1. 2222
+
+- [x] Sssssss
+  - [ ] X
+
+$$
+y = x + z
+$$
+
+|      |      |      |
+| ---- | ---- | ---- |
+|      |      |      |
+|      |      |      |
+|      |      |      |
+
+[百度]: http://baidu.com
+
+[^事事顺遂]: 万事如意
+
+------
+
+**sssss**
+
+*sssss*
+
+<u>sssssss</u>
+
+~~ssssss~~
+
+<!--sssssssssss-->
+
+[百度](http://baidu.com)
+
+![我](http://118.24.38.46:8848/nacos/img/logo-2000-390.svg)
+
