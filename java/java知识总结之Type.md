@@ -1,8 +1,6 @@
-### java知识总结之Type
-
 > Type是Java编程语言中所有类型的公共高级接口（官方解释），也就是Java中所有类型的“爹”，它并不是我们平常工作中经常使用的int、String、List、Map等数据类型，而是从Java语言角度来说，对基本类型、引用类型向上的抽象；
 
-Type体系中的类型包括：
+#### Type体系中的类型包括：
 
 - 原始类型（Type）：不仅仅包含我们平常所指的类，还包括枚举、数组、注解等；
 - 参数化类型（ParameterizedType）：就是我们平常所用到的泛型List<String>、Map<K, V>、Class<?>；
