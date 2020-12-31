@@ -267,7 +267,7 @@ Hello World! I have been seen 9 times.
 
 体验完成！
 
-#### 网络规则
+##### 网络规则
 
 项目中的内容都在同一个网络下 （可以通过`域名/容器名字`来访问了），可以通过以下命令来查看：
 
@@ -279,15 +279,197 @@ docker network ls
 
 ![QQ20201111-194035@2x](https://studysssmd.oss-cn-chengdu.aliyuncs.com/typora/QQ20201111-194035@2x.png)
 
+##### yaml规则
+
+```shell
+# 3层
+version: '' #1版本
+services:   #2服务
+	service1: 
+		# 服务配置
+		image: xx
+		build: xx
+		network: xx
+# 3其他配置 网络/卷、全局规则
+volumes:
+networks:
+configs:
+```
+
+##### 使用compose一键部署WP博客
+
 #### Docker Swarm
 
-集群的方式部署。
+##### 工作模式
+
+Docker Engine 1.12 introduces swarm mode that enables you to create a cluster of one or more Docker Engines called a swarm. A swarm consists of one or more nodes: physical or virtual machines running Docker Engine 1.12 or later in swarm mode.
+
+There are two types of nodes: [**managers**](https://docs.docker.com/engine/swarm/how-swarm-mode-works/nodes/#manager-nodes) and [**workers**](https://docs.docker.com/engine/swarm/how-swarm-mode-works/nodes/#worker-nodes).
+
+![Swarm mode cluster](https://studysssmd.oss-cn-chengdu.aliyuncs.com/typora/swarm-diagram.png)
+
+```shell
+docker swarm init --advertise-addr 192.168.57.2
+```
+
+> Swarm initialized: current node (hxf4fysbmlwy37t7g13tqlcad) is now a manager.
+>
+> To add a worker to this swarm, run the following command:
+>
+>     docker swarm join --token SWMTKN-1-22nrxb33zz817smrkrgf31wgzrzabqnbi5w7s81fp2saulwc6p-8dk2km6apq6vgp50h8qvlklne 192.168.57.2:2377
+>
+> To add a manager to this swarm, run `docker swarm join-token manager` and follow the instructions.
+>
+> ```shell
+> docker swarm join-token worker
+> docker swarm join-token manager
+> ```
+
+```shell
+docker swarm join --token SWMTKN-1-22nrxb33zz817smrkrgf31wgzrzabqnbi5w7s81fp2saulwc6p-8dk2km6apq6vgp50h8qvlklne 192.168.57.2:2377
+This node joined a swarm as a worker.
+```
+
+```shell
+docker node ls
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+hxf4fysbmlwy37t7g13tqlcad *   server2             Ready               Active              Leader              19.03.13
+e3wiohyu7fqkf7sdcvltzlosy     server3             Ready               Active                                  19.03.13
+```
+
+```shell
+docker swarm join-token manager
+To add a manager to this swarm, run the following command:
+    docker swarm join --token SWMTKN-1-22nrxb33zz817smrkrgf31wgzrzabqnbi5w7s81fp2saulwc6p-2xuf0gl02av3zmh42spr7w3rf 192.168.57.2:2377
+```
+
+##### Raft协议
+
+双主双从：假设一个节点挂了！其他节点是否可以用？
+
+Raft协议：保证大多数节点存活才可以用，只要大于1台就可以用。
+
+集群可用，至少3个主节点，并且存活大于1。
+
+##### 体会
+
+弹性、扩缩容！集群！
+
+```shell
+docker service --help
+```
+
+灰度发布：金丝雀发布！
+
+```shell
+docker service create -p 8888:80 --name my-nginx nginx
+pxmygmk2ax7ey8wpr1eya4wcs
+overall progress: 1 out of 1 tasks 
+1/1: running   [==================================================>] 
+verify: Service converged 
+```
+
+```shell
+docker service ps my-nginx
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+yop4732tptez        my-nginx.1          nginx:latest        server5             Running             Running 18 seconds ago
+
+docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+pxmygmk2ax7e        my-nginx            replicated          1/1                 nginx:latest        *:8888->80/tcp
+```
+
+```shell
+docker service update --replicas 3 my-nginx
+my-nginx
+overall progress: 3 out of 3 tasks 
+1/3: running   [==================================================>] 
+2/3: running   [==================================================>] 
+3/3: running   [==================================================>] 
+```
+
+```shell
+docker service update --replicas 1 my-nginx
+my-nginx
+overall progress: 1 out of 1 tasks 
+1/1: running   [==================================================>] 
+verify: Service converged 
+
+docker service ps my-nginx
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+yop4732tptez        my-nginx.1          nginx:latest        server5             Running             Running 10 minutes ago 
+```
+
+```shell
+docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+pxmygmk2ax7e        my-nginx            replicated          1/1                 nginx:latest        *:8888->80/tcp
+```
+
+```shell
+docker service scale my-nginx=5
+my-nginx scaled to 5
+overall progress: 5 out of 5 tasks 
+1/5: running   [==================================================>] 
+2/5: running   [==================================================>] 
+3/5: running   [==================================================>] 
+4/5: running   [==================================================>] 
+5/5: running   [==================================================>] 
+verify: Service converged 
+
+docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+pxmygmk2ax7e        my-nginx            replicated          5/5                 nginx:latest        *:8888->80/tcp
+```
+
+```shell
+docker service rm my-nginx
+my-nginx
+
+docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+```
+
+> Docker swarm其实并不难
+>
+> 只要会搭建集群、会启动服务、动态管理容器就可以了！
+
+##### 概念总结
+
+swarm
+
+集群的管理和编号。docker可以初始化一个swarm集群，其他节点可以加入。（manager、worker）
+
+node
+
+就是一个docker节点。多个节点就组成一个网络集群。（manager、worker）
+
+service
+
+任务，可以在管理节点或者工作节点来运行。
+
+task
+
+容器内的命令，细节任务！
+
+ingress
 
 #### Docker Stack
 
+```shell
+# 单机
+docker-compose up -d wordpress.yaml
+# 集群
+docker stack deploy wordpress.yaml
+```
+
 #### Docker Secret
 
+安全！配置密码，证书！
+
 #### Docker Config
+
+配置
 
 容器单独是没有意义的，有意义的是容器编排
 

@@ -94,7 +94,7 @@ jstack -l 12269 | grep 'java.lang.Thread.State' | wc -l，使用这个命令可�
 
 ![](http://studysssmd.oss-cn-chengdu.aliyuncs.com/jvm/memory/%E6%88%AA%E5%B1%8F2020-04-27%E4%B8%8B%E5%8D%885.15.33.png)
 
-### 四、jstack检测死锁
+### 四、jstack检测死锁	
 
 我们在命令终端执行jstack -l pid就可以看到这个程序的线程信息：
 
